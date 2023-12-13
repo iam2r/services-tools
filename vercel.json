@@ -1,0 +1,14 @@
+{
+	"builds": [
+		{
+			"src": "src/express.js",
+			"use": "@vercel/node"
+		}
+	],
+	"rewrites": [
+		{
+			"source": "/(.*)",
+			"destination": "/src/express.js"
+		}
+	]
+}
