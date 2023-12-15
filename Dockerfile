@@ -7,7 +7,7 @@ RUN npm install
 FROM pengzhile/pandora-next
 WORKDIR /
 
-COPY --from=builder $APP_HOME .
+COPY --from=builder /app .
 
 EXPOSE 8181
 
