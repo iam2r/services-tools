@@ -7,6 +7,10 @@ COPY ./pandora.js .
 
 FROM pengzhile/pandora-next
 
+WORKDIR /app
+
+COPY --from=builder /app .
+
 EXPOSE 8181
 
-CMD ["sh", "-c", "npm run pandora && cp -r /pandora/data /data && cp -r /pandora/sessions /root/.cache/PandoraNext && pandora-next"]
+CMD ["sh", "-c", "npm run pandora && cp -r /app/pandora/data /data && cp -r /app/pandora/sessions /root/.cache/PandoraNext && pandora-next"]
