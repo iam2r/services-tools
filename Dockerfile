@@ -4,16 +4,13 @@ WORKDIR /app
 COPY package.json .
 RUN npm install
 COPY ./pandora.js .
-RUN npm run pandora
 
 FROM pengzhile/pandora-next
 
 WORKDIR /app
 
-COPY --from=builder /app/pandora/data /data
-
-COPY --from=builder /app/pandora/sessions /root/.cache/PandoraNext
+COPY --from=builder /app .
 
 EXPOSE 8181
 
-CMD ["pandora-next"]
+CMD ["sh", "-c", "npm run pandora && cp -r /app/pandora/data /data && cp -r /app/pandora/sessions /root/.cache/PandoraNext && pandora-next"]
