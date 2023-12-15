@@ -10,9 +10,9 @@ FROM pengzhile/pandora-next
 
 WORKDIR /app
 
-COPY --from=builder /pandora/data /data
+COPY --from=builder /app/pandora/data /data
 
-COPY --from=builder /pandora/sessions /root/.cache/PandoraNext
+COPY --from=builder /app/pandora/sessions /root/.cache/PandoraNext
 
 EXPOSE 8181
 
