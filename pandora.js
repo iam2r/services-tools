@@ -1,5 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
+console.log(JSON.stringify(process.env));
 fs.mkdirSync('./pandora/data', { recursive: true });
 fs.mkdirSync('./pandora/sessions', { recursive: true });
 fs.writeFileSync(
