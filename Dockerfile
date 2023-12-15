@@ -1,15 +1,19 @@
-FROM node:18-bookworm
+FROM node:18 as builder
 
-RUN apt update -y && apt install -y libc++-dev libc++abi-dev
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY ./pandora.js .
+RUN npm run pandora
+
+FROM pengzhile/pandora-next
 
 WORKDIR /app
 
-COPY . .
+COPY --from=builder /pandora/data /data
 
-RUN --mount=type=secret,id=UUID,mode=0444,required=true \
-yarn install && \
-npx cross-env UUID=$(cat /run/secrets/UUID) node wrangler.js
+COPY --from=builder /pandora/sessions /root/.cache/PandoraNext
 
-CMD npx wrangler dev --log-level info --port 7860
+EXPOSE 8181
 
-EXPOSE 7860
+CMD ["pandora-next"]
