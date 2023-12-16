@@ -5,7 +5,8 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write '*'",
-		"pandora": "node pandora.js"
+		"pandora": "node pandora.js",
+		"start": "nodemon app.js"
 	},
 	"lint-staged": {
 		"*": "yarn prettier"
@@ -16,9 +17,13 @@
 		"cross-env": "^7.0.3",
 		"husky": "^8.0.3",
 		"lint-staged": "^13.2.3",
+		"nodemon": "^3.0.2",
 		"prettier": "^2.6.2"
 	},
 	"dependencies": {
-		"dotenv": "^16.3.1"
+		"chatgpt": "^5.2.5",
+		"cors": "^2.8.5",
+		"dotenv": "^16.3.1",
+		"express": "^4.18.2"
 	}
 }
