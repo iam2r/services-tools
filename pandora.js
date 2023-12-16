@@ -19,7 +19,7 @@ fs.writeFileSync(
 		site_password: process.env.ACCESS_CODE,
 		setup_password: process.env.ACCESS_CODE,
 		server_tokens: true,
-		proxy_api_prefix: '',
+		proxy_api_prefix: process.env.PROXY_API_PREFIX || '',
 		isolated_conv_title: '*',
 		disable_signup: false,
 		auto_conv_arkose: false,
