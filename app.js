@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
@@ -8,6 +9,8 @@ const port = 3000;
 
 // 使用 CORS 中间件允许跨域请求
 app.use(cors());
+
+app.use(bodyParser.json());
 
 const createOpenAIHandle =
 	(
