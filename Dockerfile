@@ -19,6 +19,8 @@ RUN LICENSE_ID=${LICENSE_ID} TOKENS=${TOKENS} ACCESS_CODE=${ACCESS_CODE} PROXY_A
 COPY /app/pandora/data /data
 COPY /app/pandora/sessions /root/.cache/PandoraNext
 
+COPY --from=pandora-next . .
+
 EXPOSE 8181
 
 CMD ["pandora-next"]
