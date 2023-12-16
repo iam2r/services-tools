@@ -3,6 +3,7 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY package*.json yarn*.lock $APP_HOME/
 RUN npm install
+COPY . $APP_HOME/
 
 FROM pengzhile/pandora-next
 WORKDIR /
