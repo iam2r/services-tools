@@ -38,6 +38,19 @@ app.post(
 	})
 );
 
+app.use(
+	'*',
+	createProxyMiddleware({
+		target: process.env.OPENAI_API_REVERSE_PROXY_URL || 'https://api.openai.com/',
+		changeOrigin: true,
+		onProxyReq: (proxyReq) => {
+			if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
+				proxyReq.setHeader('Authorization', `Bearer ${process.env.OPENAI_API_ACCESS_TOKEN}`);
+			}
+		},
+	})
+);
+
 // 启动服务器
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
