@@ -1,16 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-
+const defaultBaseURL = 'https://api.openai.com/';
 const app = express();
 const port = 3000;
 
 // 使用 CORS 中间件允许跨域请求
 app.use(cors());
-
-app.use(bodyParser.json());
 
 const createOpenAIHandle =
 	(
@@ -20,36 +17,28 @@ const createOpenAIHandle =
 	) =>
 	async (req, res, next) => {
 		createProxyMiddleware({
-			target: targetFun(process.env.OPENAI_API_REVERSE_PROXY_URL || 'https://api.openai.com/'),
+			target: targetFun(process.env.OPENAI_API_REVERSE_PROXY_URL || defaultBaseURL),
 			changeOrigin: true,
 			onProxyReq: (proxyReq) => {
 				if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
 					proxyReq.setHeader('Authorization', `Bearer ${process.env.OPENAI_API_ACCESS_TOKEN}`);
 				}
 			},
+			onError: () => {
+				createProxyMiddleware({
+					target: targetFun(defaultBaseURL),
+					changeOrigin: true,
+					onProxyReq: (proxyReq) => {
+						if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
+							proxyReq.setHeader('Authorization', `Bearer ${process.env.OPENAI_API_ACCESS_TOKEN}`);
+						}
+					},
+				})(req, res, next);
+			},
 		})(req, res, next);
 	};
 
-app.post('/v1/chat/completions', createOpenAIHandle());
-app.post(
-	'/backend-api/conversation',
-	createOpenAIHandle((OPENAI_API_REVERSE_PROXY_URL) => {
-		return `${OPENAI_API_REVERSE_PROXY_URL}${OPENAI_API_REVERSE_PROXY_URL.endsWith('/') ? '' : '/'}backend-api/conversation`;
-	})
-);
-
-app.use(
-	'*',
-	createProxyMiddleware({
-		target: process.env.OPENAI_API_REVERSE_PROXY_URL || 'https://api.openai.com/',
-		changeOrigin: true,
-		onProxyReq: (proxyReq) => {
-			if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
-				proxyReq.setHeader('Authorization', `Bearer ${process.env.OPENAI_API_ACCESS_TOKEN}`);
-			}
-		},
-	})
-);
+app.use('*', createOpenAIHandle());
 
 // 启动服务器
 app.listen(port, () => {
