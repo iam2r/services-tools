@@ -17,7 +17,7 @@ const createOpenAIHandle =
 	) =>
 	async (req, res, next) => {
 		createProxyMiddleware({
-			target: targetFun(process.env.OPENAI_API_REVERSE_PROXY_URL),
+			target: targetFun(process.env.OPENAI_API_REVERSE_PROXY_URL || 'https://api.openai.com/'),
 			changeOrigin: true,
 			onProxyReq: (proxyReq) => {
 				if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
