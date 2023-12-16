@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
 
 const app = express();
@@ -8,31 +9,31 @@ const port = 3000;
 // 使用 CORS 中间件允许跨域请求
 app.use(cors());
 
-const openAIHandle = async (req, res, next) => {
-	try {
-		const { ChatGPTUnofficialProxyAPI } = await import('chatgpt');
-		const api = new ChatGPTUnofficialProxyAPI({
-			apiReverseProxyUrl: process.env.OPENAI_API_REVERSE_PROXY_URL,
-			accessToken: 'accessToken',
-			debug: true,
-			model: process.env.OPENAI_API_MODEL || 'text-davinci-002-render-sha',
-		});
-		const response = await api.sendMessage('你好，请问你是什么模型你能做些什么', {
-			// conversationId: uuid.v4(),
-			// parentMessageId: '',
-			onProgress: (partialResponse) => {
-				console.log(partialResponse);
+const createOpenAIHandle =
+	(
+		targetFun = (OPENAI_API_REVERSE_PROXY_URL) => {
+			return OPENAI_API_REVERSE_PROXY_URL;
+		}
+	) =>
+	async (req, res, next) => {
+		createProxyMiddleware({
+			target: targetFun(process.env.OPENAI_API_REVERSE_PROXY_URL),
+			changeOrigin: true,
+			onProxyReq: (proxyReq) => {
+				if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
+					proxyReq.setHeader('Authorization', `Bearer ${process.env.OPENAI_API_ACCESS_TOKEN}`);
+				}
 			},
-		});
-		console.log(response.body.messages);
-	} catch (error) {
-		console.log(error);
-		console.log('dddddddddd');
-	}
-};
+		})(req, res, next);
+	};
 
-app.post('/v1/chat/completions', openAIHandle);
-app.get('/v1/chat/completions', openAIHandle);
+app.post('/v1/chat/completions', createOpenAIHandle());
+app.post(
+	'/backend-api/conversation',
+	createOpenAIHandle((OPENAI_API_REVERSE_PROXY_URL) => {
+		return `${OPENAI_API_REVERSE_PROXY_URL}${OPENAI_API_REVERSE_PROXY_URL.endsWith('/') ? '' : '/'}backend-api/conversation`;
+	})
+);
 
 // 启动服务器
 app.listen(port, () => {
