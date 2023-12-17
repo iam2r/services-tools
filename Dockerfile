@@ -36,16 +36,16 @@ RUN yarn
 COPY . $APP_HOME/
 COPY --from=pandora-next /opt/app /opt/app
 
-EXPOSE 8181 3000 
+EXPOSE 3000 
 
 CMD [ "sh","-c", "\
 yarn pandora && \
+pm2 set pm2-logrotate:max_size 50k && \
+pm2 set pm2-logrotate:retain 30 && \
+pm2 start app.js && \
 cp -r ./pandora/data /data && \
 mkdir -p /root/.cache/PandoraNext && \
 cp -r ./pandora/sessions /root/.cache/PandoraNext && \
-/opt/app/entrypoint.sh && \
-pm2 set pm2-logrotate:max_size 50k && \
-pm2 set pm2-logrotate:retain 30 && \
-pm2 start app.js"]
+/opt/app/entrypoint.sh"]
 
 

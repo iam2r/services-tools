@@ -17,7 +17,7 @@ const createOpenAIHandle =
 	) =>
 	async (req, res, next) => {
 		createProxyMiddleware({
-			target: targetFun(`http://localhost:8181/${process.env.PROXY_API_PREFIX}` || defaultBaseURL),
+			target: targetFun(`${process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181'}` || defaultBaseURL),
 			changeOrigin: true,
 			onProxyReq: (proxyReq) => {
 				if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
@@ -38,7 +38,10 @@ const createOpenAIHandle =
 		})(req, res, next);
 	};
 
-app.use('*', createOpenAIHandle());
+app.use(
+	'*',
+	createOpenAIHandle(() => `http://localhost:8181/`)
+);
 
 // 启动服务器
 app.listen(port, () => {

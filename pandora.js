@@ -3,9 +3,10 @@ const fs = require('fs');
 console.log(JSON.stringify(process.env));
 fs.mkdirSync('./pandora/data', { recursive: true });
 fs.mkdirSync('./pandora/sessions', { recursive: true });
+const prettyJSON = (data) => JSON.stringify(data, null, 2);
 fs.writeFileSync(
 	'./pandora/data/config.json',
-	JSON.stringify({
+	prettyJSON({
 		bind: '0.0.0.0:8181',
 		tls: {
 			enabled: false,
@@ -41,7 +42,7 @@ fs.writeFileSync(
 
 fs.writeFileSync(
 	'./pandora/data/tokens.json',
-	JSON.stringify(
+	prettyJSON(
 		Object.fromEntries(
 			(process.env.TOKENS || '').split(' ').map((token) => {
 				const [email, password] = token.split(',') || [];
