@@ -1,6 +1,5 @@
 require('dotenv').config();
 const fs = require('fs');
-console.log(JSON.stringify(process.env));
 fs.mkdirSync('./pandora/data', { recursive: true });
 fs.mkdirSync('./pandora/sessions', { recursive: true });
 const prettyJSON = (data) => JSON.stringify(data, null, 2);
@@ -46,15 +45,27 @@ fs.writeFileSync(
 		Object.fromEntries(
 			(process.env.TOKENS || '').split(' ').map((token) => {
 				const [email, password] = token.split(',') || [];
-				return [
-					email,
-					{
-						token,
-						shared: false,
-						show_user_info: false,
-						password,
-					},
-				];
+				if (email && password) {
+					return [
+						email,
+						{
+							token,
+							shared: false,
+							show_user_info: false,
+							password,
+						},
+					];
+				} else {
+					return [
+						require('uuid').v4(),
+						{
+							token,
+							shared: false,
+							show_user_info: false,
+							password: process.env.ACCESS_CODE,
+						},
+					];
+				}
 			})
 		)
 	)

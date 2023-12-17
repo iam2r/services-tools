@@ -36,7 +36,7 @@ RUN yarn
 COPY . $APP_HOME/
 COPY --from=pandora-next /opt/app /opt/app
 
-EXPOSE 3000 
+EXPOSE 3000
 
 CMD [ "sh","-c", "\
 yarn pandora && \
