@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
-const defaultBaseURL = 'https://api.openai.com/';
 const app = express();
 const port = 3000;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
 const tokensMap = new Map();
 const whitelist = ['/health', ...['/api/auth'].map((it) => `/${process.env.PROXY_API_PREFIX}${it}`)];
+const maxRetries = 1;
 
 function createDebouncedRequestMerger() {
 	const requestMap = new Map();
@@ -16,7 +16,6 @@ function createDebouncedRequestMerger() {
 			const requestPromise = requestFunction().finally(() => {
 				requestMap.delete(key);
 			});
-
 			requestMap.set(key, requestPromise);
 		}
 
@@ -62,30 +61,32 @@ async function getAccessToken(token) {
 	return token;
 }
 
-const createOpenAIHandle =
-	(
-		targetFun = (OPENAI_API_REVERSE_PROXY_URL) => {
-			return OPENAI_API_REVERSE_PROXY_URL;
-		}
-	) =>
-	async (req, res, next) => {
-		const needCheck = !whitelist.some((prefix) => req.originalUrl.includes(prefix));
-		if (needCheck && req.headers['authorization'] === `Bearer ${process.env.ACCESS_CODE}`) {
-			req.headers['authorization'] = `Bearer ${
-				process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(tokens[Math.floor(Math.random() * tokens.length)]))
-			}`;
-		}
-		createProxyMiddleware({
-			target: targetFun(`${process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181'}` || defaultBaseURL),
-			changeOrigin: true,
-			ws: true,
-		})(req, res, next);
-	};
+const createOpenAIHandle = () => async (req, res, next) => {
+	const needCheck = !whitelist.some((prefix) => req.originalUrl.includes(prefix));
+	if (needCheck && req.headers['authorization'] === `Bearer ${process.env.ACCESS_CODE}`) {
+		req.headers['authorization'] = `Bearer ${
+			process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(tokens[Math.floor(Math.random() * tokens.length)]))
+		}`;
+	}
 
-// health
-app.get('/health', (req, res) => {
-	res.status(200).json({ status: 'OK' });
-});
+	req.retryCount = req.retryCount || 0;
+	createProxyMiddleware({
+		target: process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181',
+		changeOrigin: true,
+		ws: true,
+		onError: (err, req, res) => {
+			console.error('Proxy Error:', err);
+			if (req.retryCount < maxRetries) {
+				req.retryCount++;
+				console.log(`Retrying (${req.retryCount}/${maxRetries})...`);
+				createOpenAIHandle(req, res, next);
+			} else {
+				console.error('Max retries reached. Giving up.');
+				res.status(500).send('Internal Server Error');
+			}
+		},
+	})(req, res, next);
+};
 
 app.use('*', createOpenAIHandle());
 
