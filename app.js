@@ -17,7 +17,7 @@ const createOpenAIHandle =
 	) =>
 	async (req, res, next) => {
 		createProxyMiddleware({
-			target: targetFun(process.env.OPENAI_API_REVERSE_PROXY_URL || defaultBaseURL),
+			target: targetFun(`http://localhost:8181/${process.env.PROXY_API_PREFIX}` || defaultBaseURL),
 			changeOrigin: true,
 			onProxyReq: (proxyReq) => {
 				if (proxyReq.getHeader('Authorization') === `Bearer ${process.env.ACCESS_CODE}`) {
