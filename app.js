@@ -25,25 +25,6 @@ function createDebouncedRequestMerger() {
 
 app.use(cors());
 
-async function loginUser(username, password) {
-	const apiUrl = `http://localhost:8181/${process.env.PROXY_API_PREFIX}/api/auth/login`;
-	const formData = new URLSearchParams();
-	formData.append('username', username);
-	formData.append('password', password);
-	const response = await fetch(apiUrl, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: formData,
-	});
-	if (!response.ok) {
-		throw new Error(`HTTP error! Status: ${response.status}`);
-	}
-	const data = await response.json();
-	return data.access_token;
-}
-
 const mergeLoginRequests = createDebouncedRequestMerger();
 
 async function getAccessToken(token) {
@@ -52,7 +33,22 @@ async function getAccessToken(token) {
 		return (
 			tokensMap.get(token) ||
 			(await mergeLoginRequests(token, async () => {
-				const access_token = await loginUser(username, password);
+				const apiUrl = `http://localhost:8181/${process.env.PROXY_API_PREFIX}/api/auth/login`;
+				const formData = new URLSearchParams();
+				formData.append('username', username);
+				formData.append('password', password);
+				const response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: formData,
+				});
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+				const data = await response.json();
+				const access_token = data.access_token;
 				tokensMap.set(token, access_token);
 				return access_token;
 			}))
@@ -61,14 +57,15 @@ async function getAccessToken(token) {
 	return token;
 }
 
-const createOpenAIHandle = () => async (req, res, next) => {
+const createAuthenticateHandle = () => async (req, res, next) => {
 	const needCheck = !whitelist.some((prefix) => req.originalUrl.includes(prefix));
-	if (needCheck && req.headers['authorization'] === `Bearer ${process.env.ACCESS_CODE}`) {
-		req.headers['authorization'] = `Bearer ${
-			process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(tokens[Math.floor(Math.random() * tokens.length)]))
-		}`;
-	}
+	const { authorization = '' } = req.headers;
+	const accessToken = process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(tokens[Math.floor(Math.random() * tokens.length)]));
+	needCheck && authorization === `Bearer ${process.env.ACCESS_CODE}` && (req.headers.authorization = `Bearer ${accessToken}`);
+	next();
+};
 
+const createOpenAIHandle = () => async (req, res, next) => {
 	req.retryCount = req.retryCount || 0;
 	createProxyMiddleware({
 		target: process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181',
@@ -88,9 +85,8 @@ const createOpenAIHandle = () => async (req, res, next) => {
 	})(req, res, next);
 };
 
-app.use('*', createOpenAIHandle());
+app.use('*', createAuthenticateHandle(), createOpenAIHandle());
 
-// 启动服务器
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
 });
