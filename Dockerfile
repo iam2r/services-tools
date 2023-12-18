@@ -11,7 +11,7 @@ COPY --from=pandora-next /opt/app /opt/app
 RUN chmod +x ./setup.sh
 EXPOSE 3000
 
-CMD ["sh","-c", "./setup.sh && pm2-runtime start pm2.config.js"]
+CMD ["sh","-c", "./setup.sh && pm2-docker start pm2.config.js"]
 
 #docker run --rm -e HTTP_PROXY=http://localhost:7890 -it -p 3000:3000/tcp openai-tools:latest
 
