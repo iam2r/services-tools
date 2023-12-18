@@ -8,14 +8,11 @@ COPY package*.json yarn*.lock $APP_HOME/
 RUN yarn
 COPY . $APP_HOME/
 COPY --from=pandora-next /opt/app /opt/app
-
+RUN chmod +x ./setup.sh
 EXPOSE 3000
 
-CMD ["sh","-c", "\
-    yarn pandora && \
-    cp -r ./pandora/data /data && \
-    mkdir -p /root/.cache/PandoraNext && \
-    cp -r ./pandora/sessions /root/.cache/PandoraNext && \
-    pm2-runtime start pm2.config.js"]
+CMD ["sh","-c", "./setup.sh && pm2-runtime start pm2.config.js"]
+
+#docker run --rm -e HTTP_PROXY=http://localhost:7890 -it -p 3000:3000/tcp openai-tools:latest
 
 

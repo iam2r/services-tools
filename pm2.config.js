@@ -16,17 +16,14 @@ module.exports = {
 	apps: [
 		{
 			...config,
-			name: 'nodejs',
-			script: 'app.js',
-			depends_on: {
-				'pandora-next': 'restart',
-			},
-		},
-		{
-			...config,
 			name: 'pandora-next',
 			exec_mode: 'fork',
 			script: '/opt/app/entrypoint.sh',
+		},
+		{
+			...config,
+			name: 'nodejs',
+			script: 'app.js',
 		},
 	],
 };
