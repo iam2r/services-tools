@@ -13,6 +13,7 @@ const baseURL = process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:81
 const HTTP_STATUS = {
 	OK: 200,
 	UNAUTHORIZED: 401,
+	ACCESS_DENIED: 403,
 	TOO_MANY_REQUESTS: 429,
 };
 
@@ -98,6 +99,7 @@ const createOpenAIHandle = () => async (req, res, next) => {
 			const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${proxyRes.req.path} [${statusCode}]`;
 			console.log(exchange);
 			switch (statusCode) {
+				case HTTP_STATUS.ACCESS_DENIED:
 				case HTTP_STATUS.UNAUTHORIZED:
 					if (autoSetAccessToken) {
 						tokensMap.delete(token);
