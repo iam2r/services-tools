@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
+const path = require('path');
 const app = express();
 const port = 3000;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
@@ -9,6 +10,8 @@ const tokensMap = new Map();
 const whitelist = [...['/api/auth'].map((it) => `/${process.env.PROXY_API_PREFIX}${it}`)];
 const maxRetries = 1;
 const baseURL = process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181';
+const proxyApiPrefix = process.env.PROXY_API_PREFIX || '';
+const apiProxyBaseURL = path.join(baseURL, proxyApiPrefix);
 
 const HTTP_STATUS = {
 	OK: 200,
@@ -45,7 +48,8 @@ async function getAccessToken(token) {
 		return (
 			tokensMap.get(token) ||
 			(await mergeLoginRequests(token, async () => {
-				const apiUrl = `${baseURL}/${process.env.PROXY_API_PREFIX}/api/auth/login`;
+				const apiUrl = path.join(apiProxyBaseURL, proxyApiPrefix ? 'api' : '', '/auth/login');
+				console.log(apiUrl);
 				const formData = new URLSearchParams();
 				formData.append('username', username);
 				formData.append('password', password);
@@ -57,6 +61,7 @@ async function getAccessToken(token) {
 					body: formData,
 				}).catch((error) => ({ ok: false, message: error?.message }));
 				if (!response.ok) {
+					console.log(response);
 					return token;
 				}
 				const data = await response.json();
@@ -96,7 +101,9 @@ const createOpenAIHandle = () => async (req, res, next) => {
 		onProxyRes: (proxyRes, req) => {
 			const statusCode = proxyRes.statusCode;
 			if (statusCode === HTTP_STATUS.OK) return;
-			const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${proxyRes.req.path} [${statusCode}]`;
+			const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${
+				proxyRes.req.path
+			} [${statusCode}] \n${JSON.stringify(req.headers, null, 2)}`;
 			console.log(exchange);
 			switch (statusCode) {
 				case HTTP_STATUS.ACCESS_DENIED:
