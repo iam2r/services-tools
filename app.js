@@ -7,7 +7,6 @@ const app = express();
 const port = 3000;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
 const tokensMap = new Map();
-const whitelist = [...['/api/auth'].map((it) => `/${process.env.PROXY_API_PREFIX}${it}`)];
 const maxRetries = 1;
 const baseURL = process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181';
 const proxyApiPrefix = process.env.PROXY_API_PREFIX || '';
@@ -75,7 +74,7 @@ async function getAccessToken(token) {
 }
 
 const createOpenAIHandle = () => async (req, res, next) => {
-	const needAuth = !whitelist.some((prefix) => req.originalUrl.includes(prefix));
+	const needAuth = req.originalUrl.includes(proxyApiPrefix);
 	const token = tokens[Math.floor(Math.random() * tokens.length)];
 	const { authorization = '' } = req.headers;
 	const autoSetAccessToken = needAuth && authorization === `Bearer ${process.env.ACCESS_CODE}`;
