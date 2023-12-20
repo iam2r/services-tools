@@ -4,7 +4,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
 const path = require('path');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
 const tokensMap = new Map();
 const maxRetries = 1;
@@ -48,16 +48,15 @@ async function getAccessToken(token) {
 			tokensMap.get(token) ||
 			(await mergeLoginRequests(token, async () => {
 				const apiUrl = path.join(apiProxyBaseURL, proxyApiPrefix ? 'api' : '', '/auth/login');
-				console.log(apiUrl);
-				const formData = new URLSearchParams();
-				formData.append('username', username);
-				formData.append('password', password);
+				const body = new URLSearchParams();
+				body.append('username', username);
+				body.append('password', password);
+				const headers = new Headers();
+				headers.append('Content-Type', 'application/x-www-form-urlencoded');
 				const response = await fetchWithTimeout(apiUrl, {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-					},
-					body: formData,
+					headers,
+					body,
 				}).catch((error) => ({ ok: false, message: error?.message }));
 				if (!response.ok) {
 					console.log(response);
@@ -100,9 +99,7 @@ const createOpenAIHandle = () => async (req, res, next) => {
 		onProxyRes: (proxyRes, req) => {
 			const statusCode = proxyRes.statusCode;
 			if (statusCode === HTTP_STATUS.OK) return;
-			const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${
-				proxyRes.req.path
-			} [${statusCode}] \n${JSON.stringify(req.headers, null, 2)}`;
+			const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${proxyRes.req.path} [${statusCode}]}`;
 			console.log(exchange);
 			switch (statusCode) {
 				case HTTP_STATUS.ACCESS_DENIED:

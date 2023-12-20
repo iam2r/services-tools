@@ -9,7 +9,7 @@ RUN yarn
 COPY . $APP_HOME/
 COPY --from=pandora-next /opt/app /opt/app
 RUN chmod +x ./setup.sh
-EXPOSE 3000
+EXPOSE 3000 8181
 
 CMD ["sh","-c", "./setup.sh && pm2-docker start pm2.config.js"]
 
