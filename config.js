@@ -1,4 +1,5 @@
 require('dotenv-defaults').config({
-	PORT_PANDORA: 3100,
-	PORT: 3000,
+	path: './.env',
+	encoding: 'utf8',
+	defaults: './.env.defaults', // This is new
 });
