@@ -162,7 +162,7 @@ app.get('/healthcheck', (req, res) => {
 });
 
 //pandora-next
-app.use('/', createOpenAIHandle());
+app.use('*', createOpenAIHandle());
 
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
