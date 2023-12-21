@@ -16,6 +16,11 @@ module.exports = {
 	apps: [
 		{
 			...config,
+			name: 'nodejs',
+			script: 'app.js',
+		},
+		{
+			...config,
 			name: 'pandora-next',
 			exec_mode: 'fork',
 			script: '/opt/app/entrypoint.sh',
@@ -25,11 +30,6 @@ module.exports = {
 			name: 'gemini2chatgpt',
 			exec_mode: 'fork',
 			script: '/gemini2chatgpt/home/app',
-		},
-		{
-			...config,
-			name: 'nodejs',
-			script: 'app.js',
 		},
 	],
 };
