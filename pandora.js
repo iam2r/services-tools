@@ -1,9 +1,9 @@
-require('dotenv').config();
+require('./config');
 const fs = require('fs');
 fs.mkdirSync('./pandora/data', { recursive: true });
 fs.mkdirSync('./pandora/sessions', { recursive: true });
 const prettyJSON = (data) => JSON.stringify(data, null, 2);
-const port = process.env.PORT_PANDORA || 3100;
+const port = process.env.PORT_PANDORA;
 fs.writeFileSync(
 	'./pandora/data/config.json',
 	prettyJSON({

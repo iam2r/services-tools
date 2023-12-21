@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('./config');
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
@@ -155,6 +155,10 @@ const createOpenAIHandle =
 			},
 		})
 	);
+});
+
+app.get('/healthcheck', (req, res) => {
+	res.status(200).json({ status: 'OK' });
 });
 
 //pandora-next
