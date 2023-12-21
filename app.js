@@ -159,10 +159,21 @@ const createOpenAIHandle =
 app.get('/healthcheck', (req, res) => {
 	res.status(200).json({ status: 'OK' });
 });
-
 //pandora-next
 app.use('*', createOpenAIHandle());
 
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
 });
+
+const keepAlive = () => {
+	const urls = (process.env.KEEP_ALIVE_URLS || '').split(',');
+	if (urls.length) {
+		console.log(`${process.env.KEEP_ALIVE_URLS} is keepalive !`);
+		setInterval(() => {
+			Promise.all(urls.map((url) => fetch(url)));
+		}, 60 * 1000 * 1);
+	}
+};
+
+keepAlive();
