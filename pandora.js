@@ -3,10 +3,11 @@ const fs = require('fs');
 fs.mkdirSync('./pandora/data', { recursive: true });
 fs.mkdirSync('./pandora/sessions', { recursive: true });
 const prettyJSON = (data) => JSON.stringify(data, null, 2);
+const port = process.env.PORT_PANDORA || 3100;
 fs.writeFileSync(
 	'./pandora/data/config.json',
 	prettyJSON({
-		bind: '0.0.0.0:8181',
+		bind: `0.0.0.0:${port}`,
 		tls: {
 			enabled: false,
 			cert_file: '',

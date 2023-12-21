@@ -3,14 +3,16 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
 const path = require('path');
+const lodash = require('lodash');
 const app = express();
 const port = process.env.PORT || 3000;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
 const tokensMap = new Map();
 const maxRetries = 1;
-const baseURL = process.env.OPENAI_API_REVERSE_PROXY_URL || 'http://localhost:8181';
-const proxyApiPrefix = process.env.PROXY_API_PREFIX || '';
-const apiProxyBaseURL = path.join(baseURL, proxyApiPrefix);
+const baseURLGemini2ChatGPT = `http://localhost:8080`;
+const baseURLPandora = process.env.BASE_URL_PANDORA || `http://localhost:${process.env.PORT_PANDORA}`;
+const proxyApiPrefixPandora = process.env.PROXY_API_PREFIX || '';
+const apiProxyBaseURLPandora = path.join(baseURLPandora, proxyApiPrefixPandora);
 
 const HTTP_STATUS = {
 	OK: 200,
@@ -47,7 +49,7 @@ async function getAccessToken(token) {
 		return (
 			tokensMap.get(token) ||
 			(await mergeLoginRequests(token, async () => {
-				const apiUrl = path.join(apiProxyBaseURL, proxyApiPrefix ? 'api' : '', '/auth/login');
+				const apiUrl = path.join(apiProxyBaseURLPandora, '/auth/login');
 				const body = new URLSearchParams();
 				body.append('username', username);
 				body.append('password', password);
@@ -72,54 +74,91 @@ async function getAccessToken(token) {
 	return token;
 }
 
-const createOpenAIHandle = () => async (req, res, next) => {
-	const needAuth = req.originalUrl.includes(proxyApiPrefix);
-	const token = tokens[Math.floor(Math.random() * tokens.length)];
-	const { authorization = '' } = req.headers;
-	const autoSetAccessToken = needAuth && authorization === `Bearer ${process.env.ACCESS_CODE}`;
-	if (autoSetAccessToken) {
-		const accessToken = process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(token));
-		req.headers.authorization = `Bearer ${accessToken}`;
-	}
-	req.retryCount = req.retryCount || 0;
-	createProxyMiddleware({
-		target: baseURL,
-		changeOrigin: true,
-		ws: true,
-		onError: () => {
-			if (req.retryCount < maxRetries) {
-				req.retryCount++;
-				console.log(`Retrying (${req.retryCount}/${maxRetries})...`);
-				createOpenAIHandle()(req, res, next);
-			} else {
-				console.error('Max retries reached. Giving up.');
-				res.status(500).send('Internal Server Error');
-			}
-		},
-		onProxyRes: (proxyRes, req) => {
-			const statusCode = proxyRes.statusCode;
-			if (statusCode === HTTP_STATUS.OK) return;
-			const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${proxyRes.req.path} [${statusCode}]}`;
-			console.log(exchange);
-			switch (statusCode) {
-				case HTTP_STATUS.ACCESS_DENIED:
-				case HTTP_STATUS.UNAUTHORIZED:
+const createOpenAIHandle =
+	(options = {}) =>
+	async (req, res, next) => {
+		req.retryCount = req.retryCount || 0;
+		const { authorizationHandler, proxyOptions } = lodash.merge(
+			{
+				authorizationHandler: async (req, { accessCodePassed } = {}) => {
+					console.log('pandora-next authorizationHandler');
+					const needAuth = req.originalUrl.includes(proxyApiPrefixPandora);
+					const token = tokens[Math.floor(Math.random() * tokens.length)];
+					const autoSetAccessToken = needAuth && accessCodePassed;
+					const accessToken = process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(token));
 					if (autoSetAccessToken) {
-						tokensMap.delete(token);
+						req.headers.authorization = `Bearer ${accessToken}`;
 					}
-					break;
-				case HTTP_STATUS.TOO_MANY_REQUESTS:
-					console.log('Too Many Requests');
-					break;
+				},
+				proxyOptions: {
+					target: baseURLPandora,
+					changeOrigin: true,
+					ws: true,
+					onError: () => {
+						if (req.retryCount < maxRetries) {
+							req.retryCount++;
+							console.log(`Retrying (${req.retryCount}/${maxRetries})...`);
+							createOpenAIHandle()(req, res, next);
+						} else {
+							console.error('Max retries reached. Giving up.');
+							res.status(500).send('Internal Server Error');
+						}
+					},
+					onProxyRes: (proxyRes, req) => {
+						const statusCode = proxyRes.statusCode;
+						if (statusCode === HTTP_STATUS.OK) return;
+						const exchange = `[PROXY DEBUG] ${req.method} ${req.path} -> ${proxyRes.req.protocol}//${proxyRes.req.host}${proxyRes.req.path} [${statusCode}]}`;
+						console.log(exchange);
+						switch (statusCode) {
+							case HTTP_STATUS.ACCESS_DENIED:
+							case HTTP_STATUS.UNAUTHORIZED:
+								if (autoSetAccessToken) {
+									tokensMap.delete(token);
+								}
+								break;
+							case HTTP_STATUS.TOO_MANY_REQUESTS:
+								console.log('Too Many Requests');
+								break;
 
-				default:
-					break;
-			}
-		},
-	})(req, res, next);
-};
+							default:
+								break;
+						}
+					},
+				},
+			},
+			options
+		);
+		await authorizationHandler(req, {
+			accessCodePassed: lodash.get(req, 'headers.authorization') === `Bearer ${process.env.ACCESS_CODE}`,
+		});
+		createProxyMiddleware(proxyOptions)(req, res, next);
+	};
 
-app.use('*', createOpenAIHandle());
+[
+	//gemini2chatgpt
+	{
+		prefix: 'gemini2chatgpt',
+		target: baseURLGemini2ChatGPT,
+	},
+].forEach(({ prefix, target }) => {
+	app.use(
+		`/${prefix}`,
+		createOpenAIHandle({
+			authorizationHandler: (req) => {
+				req.headers['openai-tools-proxy-by'] = 'gemini2chatgpt';
+			},
+			proxyOptions: {
+				target,
+				pathRewrite: {
+					[`^/${prefix}`]: '',
+				},
+			},
+		})
+	);
+});
+
+//pandora-next
+app.use('/', createOpenAIHandle());
 
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
