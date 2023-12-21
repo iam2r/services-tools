@@ -49,7 +49,7 @@ async function getAccessToken(token) {
 		return (
 			tokensMap.get(token) ||
 			(await mergeLoginRequests(token, async () => {
-				const apiUrl = path.join(apiProxyBaseURLPandora, '/auth/login');
+				const apiUrl = path.join(apiProxyBaseURLPandora, 'api/auth/login');
 				const body = new URLSearchParams();
 				body.append('username', username);
 				body.append('password', password);
