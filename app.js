@@ -78,15 +78,18 @@ const createOpenAIHandle =
 	(options = {}) =>
 	async (req, res, next) => {
 		req.retryCount = req.retryCount || 0;
+		const accessCodePassed = lodash.get(req, 'headers.authorization') === `Bearer ${process.env.ACCESS_CODE}`;
 		const { authorizationHandler, proxyOptions } = lodash.merge(
 			{
-				authorizationHandler: async (req, { accessCodePassed } = {}) => {
-					console.log('pandora-next authorizationHandler');
+				authorizationHandler: async (req) => {
 					const needAuth = req.originalUrl.includes(proxyApiPrefixPandora);
 					const token = tokens[Math.floor(Math.random() * tokens.length)];
 					const autoSetAccessToken = needAuth && accessCodePassed;
 					const accessToken = process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(token));
 					if (autoSetAccessToken) {
+						req.tokenReset = () => {
+							tokensMap.delete(token);
+						};
 						req.headers.authorization = `Bearer ${accessToken}`;
 					}
 				},
@@ -112,9 +115,7 @@ const createOpenAIHandle =
 						switch (statusCode) {
 							case HTTP_STATUS.ACCESS_DENIED:
 							case HTTP_STATUS.UNAUTHORIZED:
-								if (autoSetAccessToken) {
-									tokensMap.delete(token);
-								}
+								req?.tokenReset();
 								break;
 							case HTTP_STATUS.TOO_MANY_REQUESTS:
 								console.log('Too Many Requests');
@@ -128,9 +129,7 @@ const createOpenAIHandle =
 			},
 			options
 		);
-		await authorizationHandler(req, {
-			accessCodePassed: lodash.get(req, 'headers.authorization') === `Bearer ${process.env.ACCESS_CODE}`,
-		});
+		await authorizationHandler(req);
 		createProxyMiddleware(proxyOptions)(req, res, next);
 	};
 
