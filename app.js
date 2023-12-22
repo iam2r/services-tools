@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const lodash = require('lodash');
 const app = express();
+const mysql = require('mysql2/promise');
 const port = process.env.PORT_MAIN;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
 const tokensMap = new Map();
@@ -13,13 +14,39 @@ const baseURLGemini2ChatGPT = `http://localhost:8080`;
 const baseURLPandora = process.env.BASE_URL_PANDORA || `http://localhost:${process.env.PORT_PANDORA}`;
 const proxyApiPrefixPandora = process.env.PROXY_API_PREFIX || '';
 const apiProxyBaseURLPandora = path.join(baseURLPandora, proxyApiPrefixPandora);
-
 const HTTP_STATUS = {
 	OK: 200,
 	UNAUTHORIZED: 401,
 	ACCESS_DENIED: 403,
 	TOO_MANY_REQUESTS: 429,
 };
+const dbTablename = 'openai_tools_tokens';
+let dbConnection;
+
+async function initializeDatabase() {
+	try {
+		const [_, user, password, host, database] = (process.env.SQL_DSN || '').match(/^(.*?):(.*?)@tcp\((.*?)\)\/(.*?)\?(.*)$/) || [];
+		const config = {
+			host,
+			user,
+			password,
+			database,
+			ssl: {
+				rejectUnauthorized: true,
+			},
+		};
+		dbConnection = await mysql.createConnection(config);
+		await dbConnection.execute(`
+		create table if not exists ${dbTablename} (
+			token varchar(255) primary key,
+			access_token varchar(2048),
+			created_at timestamp default current_timestamp on update current_timestamp
+		);		
+		  `);
+	} catch (error) {
+		console.log(error);
+	}
+}
 
 function createDebouncedRequestMerger() {
 	const requestMap = new Map();
@@ -39,9 +66,35 @@ function fetchWithTimeout(url, options, timeout = 10000) {
 	return Promise.race([fetch(url, options), new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), timeout))]);
 }
 
-app.use(cors());
-
 const mergeLoginRequests = createDebouncedRequestMerger();
+
+async function storeAccessToken(token, accessToken) {
+	try {
+		const insertQuery = `REPLACE INTO ${dbTablename} (token, access_token) VALUES (?, ?)`;
+		await dbConnection.execute(insertQuery, [token, accessToken]);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getStoredAccessToken(token) {
+	try {
+		const selectQuery = `SELECT access_token FROM ${dbTablename} WHERE token = ? LIMIT 1`;
+		const [rows] = await dbConnection.execute(selectQuery, [token]);
+		return rows.length > 0 ? rows[0].access_token : null;
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function deleteStoredAccessToken(token) {
+	try {
+		const deleteQuery = `DELETE FROM ${dbTablename} WHERE token = ?`;
+		await dbConnection.execute(deleteQuery, [token]);
+	} catch (error) {
+		console.log(error);
+	}
+}
 
 async function getAccessToken(token) {
 	const [username, password] = token.split(',') || [];
@@ -49,6 +102,9 @@ async function getAccessToken(token) {
 		return (
 			tokensMap.get(token) ||
 			(await mergeLoginRequests(token, async () => {
+				let access_token;
+				access_token = await getStoredAccessToken(token);
+				if (access_token) return access_token;
 				const apiUrl = path.join(apiProxyBaseURLPandora, 'api/auth/login');
 				const body = new URLSearchParams();
 				body.append('username', username);
@@ -65,7 +121,8 @@ async function getAccessToken(token) {
 					return token;
 				}
 				const data = await response.json();
-				const access_token = data.access_token;
+				access_token = data.access_token;
+				storeAccessToken(token, access_token);
 				tokensMap.set(token, access_token);
 				return access_token;
 			}))
@@ -89,6 +146,7 @@ const createOpenAIHandle =
 					if (autoSetAccessToken) {
 						req.tokenReset = () => {
 							tokensMap.delete(token);
+							deleteStoredAccessToken(token);
 						};
 						req.headers.authorization = `Bearer ${accessToken}`;
 					}
@@ -133,6 +191,8 @@ const createOpenAIHandle =
 		createProxyMiddleware(proxyOptions)(req, res, next);
 	};
 
+app.use(cors());
+
 [
 	//gemini2chatgpt
 	{
@@ -162,11 +222,14 @@ app.get('/healthcheck', (req, res) => {
 //pandora-next
 app.use('*', createOpenAIHandle());
 
-app.listen(port, () => {
-	console.log(`Server is running at http://localhost:${port}`);
+initializeDatabase().then(() => {
+	app.listen(port, () => {
+		console.log(`Server is running at http://localhost:${port}`);
+	});
 });
 
 const keepAlive = () => {
+	if (!process.env.KEEP_ALIVE_URLS) return;
 	const urls = (process.env.KEEP_ALIVE_URLS || '').split(',');
 	if (urls.length) {
 		console.log(`${process.env.KEEP_ALIVE_URLS} is keepalive !`);
