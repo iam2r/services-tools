@@ -1,11 +1,15 @@
 require('./config');
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const lodash = require('lodash');
 const app = express();
 const mysql = require('mysql2/promise');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const port = process.env.PORT_MAIN;
 const tokens = (process.env.TOKENS || '').split(' ').map((token) => token);
 const tokensMap = new Map();
@@ -218,6 +222,36 @@ app.use(cors());
 
 app.get('/healthcheck', (req, res) => {
 	res.status(200).json({ status: 'OK' });
+});
+
+async function fileToGenerativePart(file) {
+	return {
+		inlineData: {
+			data: file.buffer.toString('base64'),
+			mimeType: file.mimetype,
+		},
+	};
+}
+
+app.post('/recognize', upload.single('file'), async (req, res) => {
+	const file = req.file;
+	const { prompt } = req.body;
+	try {
+		const { GOOGLE_GEMININ_API_KEY } = process.env;
+		const model = new GoogleGenerativeAI(GOOGLE_GEMININ_API_KEY || '').getGenerativeModel({
+			model: 'gemini-pro-vision',
+		});
+		const imageParts = await Promise.all([fileToGenerativePart(file)]);
+		const result = await model.generateContent([prompt || '请描述并提取一下图片内容', ...imageParts]);
+		const response = result.response;
+		const text = response.text();
+		res.status(200).json({
+			text,
+		});
+	} catch (error) {
+		console.error('Error generateContent:', error);
+		res.status(500).json({ error: 'Error generateContent' });
+	}
 });
 //pandora-next
 app.use('*', createOpenAIHandle());
