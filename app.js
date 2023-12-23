@@ -237,8 +237,15 @@ app.post('/recognize', upload.single('file'), async (req, res) => {
 	const file = req.file;
 	const { prompt } = req.body;
 	try {
+		let apiKey = '';
 		const { GOOGLE_GEMININ_API_KEY } = process.env;
-		const model = new GoogleGenerativeAI(GOOGLE_GEMININ_API_KEY || '').getGenerativeModel({
+		const authorization = lodash.get(req, 'headers.authorization');
+		if (authorization === `Bearer ${process.env.ACCESS_CODE}`) {
+			apiKey = GOOGLE_GEMININ_API_KEY;
+		} else {
+			apiKey = authorization.replace('Bearer ', '');
+		}
+		const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
 			model: 'gemini-pro-vision',
 		});
 		const imageParts = await Promise.all([fileToGenerativePart(file)]);
