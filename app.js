@@ -233,7 +233,7 @@ app.use(cors());
 						},
 					},
 				},
-				...(authorizationHandler ? { authorizationHandler } : {})
+				authorizationHandler ? { authorizationHandler } : {}
 			)
 		)
 	);
