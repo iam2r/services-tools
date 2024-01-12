@@ -148,7 +148,7 @@ const createOpenAIHandle =
 		const { authorizationHandler, proxyOptions } = lodash.merge(
 			{
 				authorizationHandler: async (req) => {
-					const needAuth = req.originalUrl.includes(proxyApiPrefixPandora);
+					const needAuth = options?.needAuth() ?? req.originalUrl.includes(proxyApiPrefixPandora);
 					const token = tokens[Math.floor(Math.random() * tokens.length)];
 					const autoSetAccessToken = needAuth && accessCodePassed;
 					const accessToken = process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(token));
@@ -214,12 +214,14 @@ app.use(cors());
 	{
 		prefix: 'chatgpt',
 		target: 'https://api.openai.com/',
+		needAuth: () => true,
 	},
 	{
 		prefix: 'cf.chatgpt',
 		target: 'https://gateway.ai.cloudflare.com/v1/704e0e5a2727c7791ce9f5f5892556b7/ai/openai',
+		needAuth: () => true,
 	},
-].forEach(({ prefix, target, authorizationHandler }) => {
+].forEach(({ prefix, target, authorizationHandler, needAuth }) => {
 	app.use(
 		`/${prefix}`,
 		createOpenAIHandle(
@@ -233,7 +235,8 @@ app.use(cors());
 						},
 					},
 				},
-				authorizationHandler ? { authorizationHandler } : {}
+				authorizationHandler ? { authorizationHandler } : {},
+				needAuth ? { needAuth } : {}
 			)
 		)
 	);
