@@ -128,6 +128,11 @@ async function getAccessToken(token) {
 				access_token = data.access_token;
 				storeAccessToken(token, access_token);
 				tokensMap.set(token, access_token);
+				setTimeout(() => {
+					tokensMap.delete(token);
+					deleteStoredAccessToken(token);
+					getAccessToken(token);
+				}, 1000 * 60 * 60 * 24 * 10);
 				return access_token;
 			}))
 		);
@@ -202,21 +207,35 @@ app.use(cors());
 	{
 		prefix: 'gemini2chatgpt',
 		target: baseURLGemini2ChatGPT,
+		authorizationHandler: (req) => {
+			req.headers['openai-tools-proxy-by'] = 'gemini2chatgpt';
+		},
 	},
-].forEach(({ prefix, target }) => {
+	{
+		prefix: 'chatgpt',
+		target: 'https://api.openai.com/',
+	},
+	{
+		prefix: 'cf.chatgpt',
+		target: 'https://gateway.ai.cloudflare.com/v1/704e0e5a2727c7791ce9f5f5892556b7/ai/openai',
+	},
+].forEach(({ prefix, target, authorizationHandler }) => {
 	app.use(
 		`/${prefix}`,
-		createOpenAIHandle({
-			authorizationHandler: (req) => {
-				req.headers['openai-tools-proxy-by'] = 'gemini2chatgpt';
-			},
-			proxyOptions: {
-				target,
-				pathRewrite: {
-					[`^/${prefix}`]: '',
+		createOpenAIHandle(
+			Object.assign(
+				{},
+				{
+					proxyOptions: {
+						target,
+						pathRewrite: {
+							[`^/${prefix}`]: '',
+						},
+					},
 				},
-			},
-		})
+				...(authorizationHandler ? { authorizationHandler } : {})
+			)
+		)
 	);
 });
 
