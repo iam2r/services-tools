@@ -216,11 +216,6 @@ app.use(cors());
 		target: 'https://api.openai.com/',
 		needAuth: () => true,
 	},
-	{
-		prefix: 'cf.chatgpt',
-		target: 'https://gateway.ai.cloudflare.com/v1/704e0e5a2727c7791ce9f5f5892556b7/ai/openai',
-		needAuth: () => true,
-	},
 ].forEach(({ prefix, target, authorizationHandler, needAuth }) => {
 	app.use(
 		`/${prefix}`,
