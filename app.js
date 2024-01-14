@@ -148,7 +148,7 @@ const createOpenAIHandle =
 		const { authorizationHandler, proxyOptions } = lodash.merge(
 			{
 				authorizationHandler: async (req) => {
-					const needAuth = options?.needAuth() ?? req.originalUrl.includes(proxyApiPrefixPandora);
+					const needAuth = options?.needAuth?.() ?? req.originalUrl.includes(proxyApiPrefixPandora);
 					const token = tokens[Math.floor(Math.random() * tokens.length)];
 					const autoSetAccessToken = needAuth && accessCodePassed;
 					const accessToken = process.env.OPENAI_API_ACCESS_TOKEN || (await getAccessToken(token));
