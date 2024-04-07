@@ -5,7 +5,8 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write '*'",
-		"start": "nodemon app.js"
+		"start": "nodemon app.js",
+		"chatgpt": "nodemon src/chatgpt.js"
 	},
 	"lint-staged": {
 		"*": "yarn prettier"
@@ -18,10 +19,13 @@
 		"husky": "^8.0.3",
 		"lint-staged": "^13.2.3",
 		"nodemon": "^3.0.2",
-		"prettier": "^2.6.2"
+		"prettier": "^2.6.2",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
 	},
 	"dependencies": {
 		"@google/generative-ai": "^0.1.3",
+		"axios": "^1.6.7",
 		"cors": "^2.8.5",
 		"express": "^4.18.2",
 		"http-proxy-middleware": "^2.0.6",

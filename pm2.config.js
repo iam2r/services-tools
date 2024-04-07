@@ -19,17 +19,17 @@ module.exports = {
 			name: 'nodejs',
 			script: 'app.js',
 		},
-		// {
-		// 	...config,
-		// 	name: 'gemini2chatgpt',
-		// 	exec_mode: 'fork',
-		// 	script: '/gemini2chatgpt/home/app',
-		// },
 		{
 			...config,
-			name: 'aurora',
+			name: 'gemini2chatgpt',
 			exec_mode: 'fork',
-			script: '/aurora/app/aurora',
+			script: '/gemini2chatgpt/home/app',
+		},
+		{
+			...config,
+			name: 'chatgpt',
+			exec_mode: 'fork',
+			script: 'src/chatgpt.js',
 		},
 	],
 };

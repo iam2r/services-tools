@@ -1,5 +1,4 @@
 FROM sxz799/gemini2chatgpt as gemini2chatgpt
-FROM ghcr.io/aurora-develop/aurora:latest as aurora
 FROM node:18
 ENV APP_HOME /node/app
 WORKDIR $APP_HOME
@@ -9,11 +8,7 @@ COPY package*.json yarn*.lock $APP_HOME/
 RUN yarn
 COPY . $APP_HOME/
 
-
 COPY --from=gemini2chatgpt . /gemini2chatgpt
-
-COPY --from=aurora . /aurora
-COPY --from=aurora ./app/harPool /app/harPool
 
 EXPOSE 3000 
 

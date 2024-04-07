@@ -35,19 +35,17 @@ const createOpenAIHandle =
 app.use(cors());
 
 [
-	// {
-	// 	prefix: 'gemini2chatgpt',
-	// 	target: 'http://localhost:8080',
-	// 	authorizationHandler: (req) => {
-	// 		req.headers['openai-tools-proxy-by'] = 'gemini2chatgpt';
-	// 	},
-	// },
 	{
-		prefix: 'aurora',
+		prefix: 'gemini2chatgpt',
 		target: 'http://localhost:8080',
 		authorizationHandler: (req) => {
 			req.headers['openai-tools-proxy-by'] = 'gemini2chatgpt';
 		},
+	},
+	{
+		prefix: 'chatgpt',
+		target: 'http://localhost:3040',
+		authorizationHandler: (req) => {},
 	},
 ].forEach(({ prefix, target, authorizationHandler, needAuth }) => {
 	app.use(
@@ -68,10 +66,6 @@ app.use(cors());
 			)
 		)
 	);
-});
-
-app.get('/', (req, res) => {
-	res.status(200).json({ status: 'OK' });
 });
 
 app.get('/healthcheck', (req, res) => {
