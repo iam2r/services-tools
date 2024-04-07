@@ -5,7 +5,6 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write '*'",
-		"pandora": "node pandora.js",
 		"start": "nodemon app.js"
 	},
 	"lint-staged": {
