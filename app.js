@@ -74,6 +74,10 @@ app.get('/', (req, res) => {
 	res.status(200).json({ status: 'OK' });
 });
 
+app.get('/healthcheck', (req, res) => {
+	res.status(200).json({ status: 'OK' });
+});
+
 async function fileToGenerativePart(file) {
 	return {
 		inlineData: {
