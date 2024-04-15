@@ -75,13 +75,6 @@ app.use(cors());
 
 [
 	{
-		prefix: 'gemini2chatgpt',
-		target: 'http://localhost:8080',
-		authorizationHandler: (req) => {
-			req.headers['openai-tools-proxy-by'] = 'gemini2chatgpt';
-		},
-	},
-	{
 		prefix: 'chatgpt',
 		target: 'http://localhost:3040',
 		authorizationHandler: (req) => {},

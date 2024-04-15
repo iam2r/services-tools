@@ -21,12 +21,6 @@ module.exports = {
 		},
 		{
 			...config,
-			name: 'gemini2chatgpt',
-			exec_mode: 'fork',
-			script: '/gemini2chatgpt/home/app',
-		},
-		{
-			...config,
 			name: 'chatgpt',
 			exec_mode: 'fork',
 			script: 'src/chatgpt.js',
