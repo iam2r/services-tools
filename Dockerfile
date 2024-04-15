@@ -10,7 +10,7 @@ COPY . $APP_HOME/
 
 COPY --from=gemini2chatgpt . /gemini2chatgpt
 
-EXPOSE 3040
+EXPOSE 3000
 
 CMD ["sh","-c", "pm2-docker start pm2.config.js"]
 
