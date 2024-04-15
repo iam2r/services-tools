@@ -4,11 +4,50 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const multer = require('multer');
 const cors = require('cors');
+const mysql = require('mysql2/promise');
 const lodash = require('lodash');
 const app = express();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const port = process.env.PORT_MAIN;
+
+const dbTablename = 'openai_tools_tokens';
+let dbConnection;
+
+async function initializeDatabase() {
+	try {
+		const [_, user, password, host, database] = (process.env.SQL_DSN || '').match(/^(.*?):(.*?)@tcp\((.*?)\)\/(.*?)\?(.*)$/) || [];
+		const config = {
+			host,
+			user,
+			password,
+			database,
+			ssl: {
+				rejectUnauthorized: true,
+			},
+		};
+		dbConnection = await mysql.createConnection(config);
+		await dbConnection.execute(`
+		create table if not exists ${dbTablename} (
+			token varchar(255) primary key,
+			access_token varchar(2048),
+			created_at timestamp default current_timestamp on update current_timestamp
+		);		
+		  `);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getStoredAccessToken(token) {
+	try {
+		const selectQuery = `SELECT access_token FROM ${dbTablename} WHERE token = ? LIMIT 1`;
+		const [rows] = await dbConnection.execute(selectQuery, [token]);
+		return rows.length > 0 ? rows[0].access_token : null;
+	} catch (error) {
+		console.log(error);
+	}
+}
 
 const createOpenAIHandle =
 	(options = {}) =>
@@ -111,6 +150,15 @@ app.post('/recognize', upload.single('file'), async (req, res) => {
 
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
+});
+
+/**
+ * 数据库保活
+ */
+initializeDatabase().then(() => {
+	setInterval(() => {
+		getStoredAccessToken('db-keepalive');
+	}, 3600 * 1000 * 24);
 });
 
 const keepAlive = () => {
