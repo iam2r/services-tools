@@ -3,7 +3,8 @@
 		"transpileOnly": true,
 		"compilerOptions": {
 			"target": "ESNext",
-			"module": "CommonJS"
+			"module": "CommonJS",
+			"allowJs": true
 		}
 	},
 	"compilerOptions": {

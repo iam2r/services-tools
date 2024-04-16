@@ -4,7 +4,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const multer = require('multer');
 const cors = require('cors');
-const mysql = require('mysql2/promise');
+const postgres = require('postgres');
 const lodash = require('lodash');
 const app = express();
 const storage = multer.memoryStorage();
@@ -16,24 +16,25 @@ let dbConnection;
 
 async function initializeDatabase() {
 	try {
-		const [_, user, password, host, database] = (process.env.SQL_DSN || '').match(/^(.*?):(.*?)@tcp\((.*?)\)\/(.*?)\?(.*)$/) || [];
+		const [_, user, password, host, , port, database] =
+			(process.env.SQL_DSN || '').match(/^postgres:\/\/(.*?):(.*?)@(.*?)(:(.*?))?\/(.*?)$/) || [];
+
 		const config = {
-			host,
 			user,
 			password,
+			host,
+			port,
 			database,
-			ssl: {
-				rejectUnauthorized: true,
-			},
+			ssl: 'require',
 		};
-		dbConnection = await mysql.createConnection(config);
-		await dbConnection.execute(`
-		create table if not exists ${dbTablename} (
-			token varchar(255) primary key,
-			access_token varchar(2048),
-			created_at timestamp default current_timestamp on update current_timestamp
-		);		
-		  `);
+		dbConnection = postgres(config);
+		// await dbConnection`
+		// 	create table if not exists ${dbTablename} (
+		// 		token varchar(255) primary key,
+		// 		access_token varchar(2048),
+		// 		created_at timestamp default current_timestamp on update current_timestamp
+		// 	);
+		// `;
 	} catch (error) {
 		console.log(error);
 	}
@@ -41,8 +42,8 @@ async function initializeDatabase() {
 
 async function getStoredAccessToken(token) {
 	try {
-		const selectQuery = `SELECT access_token FROM ${dbTablename} WHERE token = ? LIMIT 1`;
-		const [rows] = await dbConnection.execute(selectQuery, [token]);
+		const selectQuery = `SELECT access_token FROM ${dbTablename} WHERE token = \$1 LIMIT 1`;
+		const { rows } = await dbConnection.query(selectQuery, [token]);
 		return rows.length > 0 ? rows[0].access_token : null;
 	} catch (error) {
 		console.log(error);
@@ -77,6 +78,11 @@ app.use(cors());
 	{
 		prefix: 'chatgpt',
 		target: 'http://localhost:3040',
+		authorizationHandler: (req) => {},
+	},
+	{
+		prefix: 'coze',
+		target: 'http://localhost:3042',
 		authorizationHandler: (req) => {},
 	},
 ].forEach(({ prefix, target, authorizationHandler, needAuth }) => {
@@ -150,7 +156,7 @@ app.listen(port, () => {
  */
 initializeDatabase().then(() => {
 	setInterval(() => {
-		getStoredAccessToken('db-keepalive');
+		// getStoredAccessToken('db-keepalive');
 	}, 3600 * 1000 * 24);
 });
 

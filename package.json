@@ -6,7 +6,8 @@
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write '*'",
 		"start": "nodemon app.js",
-		"chatgpt": "nodemon src/chatgpt.js"
+		"chatgpt": "nodemon src/chatgpt.js",
+		"coze": "nodemon src/coze/app.mjs"
 	},
 	"lint-staged": {
 		"*": "yarn prettier"
@@ -32,6 +33,10 @@
 		"http-proxy-middleware": "^2.0.6",
 		"lodash": "^4.17.21",
 		"multer": "^1.4.5-lts.1",
-		"mysql2": "^3.6.5"
+		"mysql2": "^3.6.5",
+		"node-fetch": "^3.3.2",
+		"openai": "^4.3.1",
+		"pg": "^8.11.5",
+		"postgres": "^3.4.4"
 	}
 }
