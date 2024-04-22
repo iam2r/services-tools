@@ -31,11 +31,11 @@ module.exports = {
 			exec_mode: 'fork',
 			script: 'src/coze/app.mjs',
 		},
-		{
-			...config,
-			name: 'kimi',
-			exec_mode: 'fork',
-			script: '/kimi/dist/index.js',
-		},
+		// {
+		// 	...config,
+		// 	name: 'kimi',
+		// 	exec_mode: 'fork',
+		// 	script: '/kimi/dist/index.js',
+		// },
 	],
 };
