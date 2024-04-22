@@ -1,4 +1,5 @@
 FROM sxz799/gemini2chatgpt as gemini2chatgpt
+FROM vinlic/kimi-free-api:latest as kimi
 FROM node:18
 ENV APP_HOME /node/app
 WORKDIR $APP_HOME
@@ -9,9 +10,6 @@ RUN yarn
 COPY . $APP_HOME/
 
 COPY --from=gemini2chatgpt . /gemini2chatgpt
-
-FROM vinlic/kimi-free-api:latest as kimi
-
 COPY --from=kimi . /kimi
 
 EXPOSE 3000
