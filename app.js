@@ -88,13 +88,22 @@ app.use(express.json());
 	},
 	{
 		prefix: 'kimi',
-		target: 'http://localhost:8000',
-		authorizationHandler: (req) => {},
+		target: 'https://kimi-free-api-2zpo.onrender.com/',
+		authorizationHandler: (req) => {
+			if (req.headers.authorization === `Bearer ${process.env.ACCESS_CODE}`) {
+				req.headers.authorization = `Bearer ${process.env.KIMI_TOKEN}`;
+			}
+		},
 	},
 	{
 		prefix: 'kimi-search',
-		target: 'http://localhost:8000',
-		onProxyReq: (proxyReq) => {
+		target: 'https://kimi-free-api-2zpo.onrender.com/',
+		authorizationHandler: (req) => {
+			if (req.headers.authorization === `Bearer ${process.env.ACCESS_CODE}`) {
+				req.headers.authorization = `Bearer ${process.env.KIMI_TOKEN}`;
+			}
+		},
+		onProxyReq: (proxyReq, req) => {
 			const originalBody = req.body;
 			const modifiedParamsString = JSON.stringify({
 				...originalBody,
@@ -189,7 +198,7 @@ const keepAlive = () => {
 		console.log(`${process.env.KEEP_ALIVE_URLS} is keepalive !`);
 		setInterval(() => {
 			Promise.all(urls.map((url) => fetch(url)));
-		}, 60 * 1000 * 1);
+		}, 60 * 1000 * 5);
 	}
 };
 
