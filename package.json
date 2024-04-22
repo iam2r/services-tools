@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"prepare": "husky install",
-		"prettier": "prettier --ignore-unknown --write '*'",
+		"prettier": "prettier --ignore-unknown --write *",
 		"start": "nodemon app.js",
 		"chatgpt": "nodemon src/chatgpt.js",
 		"coze": "nodemon src/coze/app.mjs"

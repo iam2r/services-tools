@@ -10,6 +10,10 @@ COPY . $APP_HOME/
 
 COPY --from=gemini2chatgpt . /gemini2chatgpt
 
+FROM vinlic/kimi-free-api:latest as kimi
+
+COPY --from=kimi . /kimi
+
 EXPOSE 3000
 
 CMD ["sh","-c", "pm2-docker start pm2.config.js"]

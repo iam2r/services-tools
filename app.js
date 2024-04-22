@@ -73,6 +73,7 @@ const createOpenAIHandle =
 	};
 
 app.use(cors());
+app.use(express.json());
 
 [
 	{
@@ -85,7 +86,27 @@ app.use(cors());
 		target: 'http://localhost:3042',
 		authorizationHandler: (req) => {},
 	},
-].forEach(({ prefix, target, authorizationHandler, needAuth }) => {
+	{
+		prefix: 'kimi',
+		target: 'http://localhost:8000',
+		authorizationHandler: (req) => {},
+	},
+	{
+		prefix: 'kimi-search',
+		target: 'http://localhost:8000',
+		onProxyReq: (proxyReq) => {
+			const originalBody = req.body;
+			const modifiedParamsString = JSON.stringify({
+				...originalBody,
+				use_search: true,
+			});
+			proxyReq.setHeader('Content-Type', 'application/json');
+			proxyReq.setHeader('Content-Length', Buffer.byteLength(modifiedParamsString));
+			proxyReq.write(modifiedParamsString);
+			proxyReq.end();
+		},
+	},
+].forEach(({ prefix, target, authorizationHandler, needAuth, onProxyReq }) => {
 	app.use(
 		`/${prefix}`,
 		createOpenAIHandle(
@@ -97,6 +118,7 @@ app.use(cors());
 						pathRewrite: {
 							[`^/${prefix}`]: '',
 						},
+						...(onProxyReq ? { onProxyReq } : {}),
 					},
 				},
 				authorizationHandler ? { authorizationHandler } : {},
