@@ -35,7 +35,7 @@ module.exports = {
 			...config,
 			name: 'kimi',
 			exec_mode: 'fork',
-			script: 'kimi/dist/index.js',
+			script: '/kimi/dist/index.js',
 		},
 	],
 };
