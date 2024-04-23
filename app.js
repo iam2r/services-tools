@@ -75,6 +75,39 @@ const createOpenAIHandle =
 app.use(cors());
 app.use(express.json());
 
+const createBaseAuthorizationHandler = (token) => (req) => {
+	if (req.headers.authorization === `Bearer ${process.env.ACCESS_CODE}` && token) {
+		req.headers.authorization = `Bearer ${token}`;
+	}
+};
+
+const createBaseBodyModified =
+	(callback = (originalBody) => originalBody) =>
+	(proxyReq, req) => {
+		const originalBody = req.body;
+		const modifiedParamsString = JSON.stringify(
+			callback({
+				...originalBody,
+			})
+		);
+		proxyReq.setHeader('Content-Type', 'application/json');
+		proxyReq.setHeader('Content-Length', Buffer.byteLength(modifiedParamsString));
+		proxyReq.write(modifiedParamsString);
+		proxyReq.end();
+	};
+
+const createKimiOptions = (useSearch = false) => {
+	return {
+		authorizationHandler: createBaseAuthorizationHandler(process.env.KIMI_TOKEN),
+		onProxyReq: createBaseBodyModified((originalBody) => {
+			return {
+				...originalBody,
+				use_search: useSearch,
+			};
+		}),
+	};
+};
+
 [
 	{
 		prefix: 'chatgpt',
@@ -89,31 +122,12 @@ app.use(express.json());
 	{
 		prefix: 'kimi',
 		target: 'https://kimi-free-api-2zpo.onrender.com/',
-		authorizationHandler: (req) => {
-			if (req.headers.authorization === `Bearer ${process.env.ACCESS_CODE}`) {
-				req.headers.authorization = `Bearer ${process.env.KIMI_TOKEN}`;
-			}
-		},
+		...createKimiOptions(),
 	},
 	{
 		prefix: 'kimi-search',
 		target: 'https://kimi-free-api-2zpo.onrender.com/',
-		authorizationHandler: (req) => {
-			if (req.headers.authorization === `Bearer ${process.env.ACCESS_CODE}`) {
-				req.headers.authorization = `Bearer ${process.env.KIMI_TOKEN}`;
-			}
-		},
-		onProxyReq: (proxyReq, req) => {
-			const originalBody = req.body;
-			const modifiedParamsString = JSON.stringify({
-				...originalBody,
-				use_search: true,
-			});
-			proxyReq.setHeader('Content-Type', 'application/json');
-			proxyReq.setHeader('Content-Length', Buffer.byteLength(modifiedParamsString));
-			proxyReq.write(modifiedParamsString);
-			proxyReq.end();
-		},
+		...createKimiOptions(true),
 	},
 ].forEach(({ prefix, target, authorizationHandler, needAuth, onProxyReq }) => {
 	app.use(
