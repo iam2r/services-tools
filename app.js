@@ -120,6 +120,11 @@ const createKimiOptions = (useSearch = false) => {
 		authorizationHandler: (req) => {},
 	},
 	{
+		prefix: 'cohere',
+		target: 'https://cohere2openai.8qqcvpxjfh.workers.dev/',
+		authorizationHandler: createBaseAuthorizationHandler(process.env.COHERE_TOKEN),
+	},
+	{
 		prefix: 'kimi',
 		target: 'https://kimi-free-api-2zpo.onrender.com/',
 		...createKimiOptions(),
