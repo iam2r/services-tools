@@ -19,23 +19,17 @@ module.exports = {
 			name: 'nodejs',
 			script: 'app.js',
 		},
-		{
-			...config,
-			name: 'chatgpt',
-			exec_mode: 'fork',
-			script: 'src/chatgpt.js',
-		},
+		// {
+		// 	...config,
+		// 	name: 'chatgpt',
+		// 	exec_mode: 'fork',
+		// 	script: 'src/chatgpt.js',
+		// },
 		{
 			...config,
 			name: 'coze',
 			exec_mode: 'fork',
 			script: 'src/coze/app.mjs',
 		},
-		// {
-		// 	...config,
-		// 	name: 'kimi',
-		// 	exec_mode: 'fork',
-		// 	script: '/kimi/dist/index.js',
-		// },
 	],
 };
