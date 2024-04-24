@@ -121,7 +121,7 @@ const createKimiOptions = (useSearch = false) => {
 	},
 	{
 		prefix: 'cohere',
-		target: 'https://cohere2openai.8qqcvpxjfh.workers.dev/',
+		target: 'https://cohere.181918.xyz',
 		authorizationHandler: createBaseAuthorizationHandler(process.env.COHERE_TOKEN),
 	},
 	{
