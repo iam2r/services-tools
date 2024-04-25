@@ -16,20 +16,8 @@ module.exports = {
 	apps: [
 		{
 			...config,
-			name: 'nodejs',
-			script: 'app.js',
+			script: 'npm',
+			args: 'run start',
 		},
-		// {
-		// 	...config,
-		// 	name: 'chatgpt',
-		// 	exec_mode: 'fork',
-		// 	script: 'src/chatgpt.js',
-		// },
-		// {
-		// 	...config,
-		// 	name: 'coze',
-		// 	exec_mode: 'fork',
-		// 	script: 'src/coze/app.mjs',
-		// },
 	],
 };
