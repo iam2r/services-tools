@@ -25,11 +25,11 @@ module.exports = {
 		// 	exec_mode: 'fork',
 		// 	script: 'src/chatgpt.js',
 		// },
-		{
-			...config,
-			name: 'coze',
-			exec_mode: 'fork',
-			script: 'src/coze/app.mjs',
-		},
+		// {
+		// 	...config,
+		// 	name: 'coze',
+		// 	exec_mode: 'fork',
+		// 	script: 'src/coze/app.mjs',
+		// },
 	],
 };

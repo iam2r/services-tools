@@ -435,7 +435,9 @@ app.listen(port, async () => {
 	let publicURL: string;
 	if (cloudflared) {
 		filePath = await DownloadCloudflared();
-		publicURL = await StartCloudflaredTunnel(filePath);
+		publicURL = await StartCloudflaredTunnel(filePath).catch(() => {
+			return '';
+		});
 	}
 
 	console.log(`💡 Server is running at http://localhost:${port}`);

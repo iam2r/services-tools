@@ -5,9 +5,9 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
-		"start": "nodemon app.js",
-		"chatgpt": "nodemon src/chatgpt.js",
-		"coze": "nodemon src/coze/app.mjs"
+		"start": "tsx watch app.js",
+		"chatgpt": "tsx watch src/chatgpt.ts",
+		"coze": "tsx watch src/coze/app.mjs"
 	},
 	"lint-staged": {
 		"*": "yarn prettier"
@@ -19,9 +19,8 @@
 		"dotenv-defaults": "^5.0.2",
 		"husky": "^8.0.3",
 		"lint-staged": "^13.2.3",
-		"nodemon": "^3.0.2",
 		"prettier": "^2.6.2",
-		"ts-node": "^10.9.2",
+		"tsx": "^4.7.2",
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
@@ -33,10 +32,7 @@
 		"http-proxy-middleware": "^2.0.6",
 		"lodash": "^4.17.21",
 		"multer": "^1.4.5-lts.1",
-		"mysql2": "^3.6.5",
 		"node-fetch": "^3.3.2",
-		"openai": "^4.3.1",
-		"pg": "^8.11.5",
-		"postgres": "^3.4.4"
+		"openai": "^4.3.1"
 	}
 }

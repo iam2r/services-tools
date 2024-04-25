@@ -4,51 +4,11 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const multer = require('multer');
 const cors = require('cors');
-const postgres = require('postgres');
 const lodash = require('lodash');
 const app = express();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const port = process.env.PORT_MAIN;
-
-const dbTablename = 'openai_tools_tokens';
-let dbConnection;
-
-async function initializeDatabase() {
-	try {
-		const [_, user, password, host, , port, database] =
-			(process.env.SQL_DSN || '').match(/^postgres:\/\/(.*?):(.*?)@(.*?)(:(.*?))?\/(.*?)$/) || [];
-
-		const config = {
-			user,
-			password,
-			host,
-			port,
-			database,
-			ssl: 'require',
-		};
-		dbConnection = postgres(config);
-		// await dbConnection`
-		// 	create table if not exists ${dbTablename} (
-		// 		token varchar(255) primary key,
-		// 		access_token varchar(2048),
-		// 		created_at timestamp default current_timestamp on update current_timestamp
-		// 	);
-		// `;
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-async function getStoredAccessToken(token) {
-	try {
-		const selectQuery = `SELECT access_token FROM ${dbTablename} WHERE token = \$1 LIMIT 1`;
-		const { rows } = await dbConnection.query(selectQuery, [token]);
-		return rows.length > 0 ? rows[0].access_token : null;
-	} catch (error) {
-		console.log(error);
-	}
-}
 
 const createOpenAIHandle =
 	(options = {}) =>
@@ -56,11 +16,7 @@ const createOpenAIHandle =
 		req.retryCount = req.retryCount || 0;
 		const { authorizationHandler, proxyOptions } = lodash.merge(
 			{
-				authorizationHandler: async (req) => {
-					/**
-					 *
-					 */
-				},
+				authorizationHandler: createBaseAuthorizationHandler(options.apiKey),
 				proxyOptions: {
 					changeOrigin: true,
 					ws: true,
@@ -68,7 +24,7 @@ const createOpenAIHandle =
 			},
 			options
 		);
-		await authorizationHandler(req);
+		authorizationHandler(req);
 		createProxyMiddleware(proxyOptions)(req, res, next);
 	};
 
@@ -98,7 +54,7 @@ const createBaseBodyModified =
 
 const createKimiOptions = (useSearch = false) => {
 	return {
-		authorizationHandler: createBaseAuthorizationHandler(process.env.KIMI_TOKEN),
+		apiKey: process.env.KIMI_TOKEN,
 		onProxyReq: createBaseBodyModified((originalBody) => {
 			return {
 				...originalBody,
@@ -110,50 +66,36 @@ const createKimiOptions = (useSearch = false) => {
 
 [
 	{
-		prefix: 'chatgpt',
-		target: 'http://localhost:3040',
-		authorizationHandler: (req) => {},
-	},
-	{
-		prefix: 'coze',
-		target: 'http://localhost:3042',
-		authorizationHandler: (req) => {},
-	},
-	{
 		prefix: 'cohere',
 		target: 'https://cohere.181918.xyz',
-		authorizationHandler: createBaseAuthorizationHandler(process.env.COHERE_TOKEN),
+		apiKey: process.env.COHERE_TOKEN,
 	},
 	{
 		prefix: 'kimi',
-		target: 'https://kimi-free-api-2zpo.onrender.com/',
+		target: 'https://kimi.181918.xyz',
 		...createKimiOptions(),
 	},
 	{
 		prefix: 'kimi-search',
-		target: 'https://kimi-free-api-2zpo.onrender.com/',
+		target: 'https://kimi.181918.xyz',
 		...createKimiOptions(true),
 	},
-].forEach(({ prefix, target, authorizationHandler, needAuth, onProxyReq }) => {
-	app.use(
-		`/${prefix}`,
-		createOpenAIHandle(
-			Object.assign(
-				{},
-				{
-					proxyOptions: {
-						target,
-						pathRewrite: {
-							[`^/${prefix}`]: '',
-						},
-						...(onProxyReq ? { onProxyReq } : {}),
-					},
+].forEach(({ prefix, target, authorizationHandler, onProxyReq, apiKey = '' }) => {
+	const options = lodash.merge(
+		{},
+		{
+			apiKey,
+			proxyOptions: {
+				target,
+				pathRewrite: {
+					[`^/${prefix}`]: '',
 				},
-				authorizationHandler ? { authorizationHandler } : {},
-				needAuth ? { needAuth } : {}
-			)
-		)
+				...(onProxyReq ? { onProxyReq } : {}),
+			},
+		},
+		authorizationHandler ? { authorizationHandler } : {}
 	);
+	app.use(`/${prefix}`, createOpenAIHandle(options));
 });
 
 app.get('/healthcheck', (req, res) => {
@@ -198,16 +140,11 @@ app.post('/recognize', upload.single('file'), async (req, res) => {
 });
 
 app.listen(port, () => {
+	console.log('📝 Author: Razo');
+	console.log('🌍 GitHub Repository: https://github.com/iam2r/openai-tools');
+	console.log(`💖 Don't forget to star the repository if you like this project!`);
+	console.log();
 	console.log(`Server is running at http://localhost:${port}`);
-});
-
-/**
- * 数据库保活
- */
-initializeDatabase().then(() => {
-	setInterval(() => {
-		// getStoredAccessToken('db-keepalive');
-	}, 3600 * 1000 * 24);
 });
 
 const keepAlive = () => {
