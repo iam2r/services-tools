@@ -5,7 +5,7 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
-		"start": "tsx watch app.js",
+		"start": "tsx watch app.mjs",
 		"chatgpt": "tsx watch src/chatgpt.ts",
 		"coze": "tsx watch src/coze/app.mjs"
 	},

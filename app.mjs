@@ -1,10 +1,11 @@
-require('./config');
-const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const multer = require('multer');
-const cors = require('cors');
-const lodash = require('lodash');
+import './config.js';
+import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import multer from 'multer';
+import cors from 'cors';
+import lodash from 'lodash';
+
 const app = express();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
