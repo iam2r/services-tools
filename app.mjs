@@ -105,7 +105,7 @@ app.get('/healthcheck', (req, res) => {
 });
 
 app.get('/cf/get_optimization_ip', (req, res) => {
-	const { format = 'normal' } = req.query;
+	const { format = 'normal', type = 'v4' } = req.query;
 	const config = {
 		method: 'post',
 		url: 'https://api.hostmonit.com/get_optimization_ip',
@@ -124,7 +124,7 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 			'sec-fetch-site': 'same-site',
 			'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 		},
-		data: { key: 'iDetkOys' },
+		data: { key: 'iDetkOys', type },
 	};
 	axios(config)
 		.then(function (response) {
@@ -133,8 +133,8 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 					? res.send(
 							(() => {
 								const result = (response.data.info || [])
-									.map(({ ip, colo, node }) => {
-										return `${ip}#${node} - ${colo}`;
+									.map(({ ip, node }, i) => {
+										return `${type === 'v6' ? `[${ip}]` : ip}#${node} - IP${type} - ${i + 1}`;
 									})
 									.join('\n');
 								res.setHeader('Content-Type', 'text/plain');
