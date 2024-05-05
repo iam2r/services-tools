@@ -167,7 +167,7 @@ app.get('/cf/addressesapi', (req, res) => {
 						.map((vlessUrl) => {
 							const { host, hash, query } = url.parse(vlessUrl, true);
 
-							return host && hash && query.security === 'tls' ? `${host}${hash}` : '';
+							return host && hash && query.security === 'tls' ? `${host}${decodeURI(hash)}` : '';
 						})
 						.filter(Boolean)
 						.join('\n');
