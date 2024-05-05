@@ -6,6 +6,7 @@ import multer from 'multer';
 import cors from 'cors';
 import lodash from 'lodash';
 import axios from 'axios';
+import url from 'url';
 
 const app = express();
 const storage = multer.memoryStorage();
@@ -69,17 +70,17 @@ const createKimiOptions = (useSearch = false) => {
 [
 	{
 		prefix: 'cohere',
-		target: 'https://cohere.181918.xyz',
+		target: 'https://cohere2openai.iamrazo.workers.dev',
 		apiKey: process.env.COHERE_TOKEN,
 	},
 	{
 		prefix: 'kimi',
-		target: 'https://kimi.181918.xyz',
+		target: 'https://kimi-free-api-o85q.onrender.com',
 		...createKimiOptions(),
 	},
 	{
 		prefix: 'kimi-search',
-		target: 'https://kimi.181918.xyz',
+		target: 'https://kimi-free-api-o85q.onrender.com',
 		...createKimiOptions(true),
 	},
 ].forEach(({ prefix, target, authorizationHandler, onProxyReq, apiKey = '' }) => {
@@ -146,6 +147,37 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 		})
 		.catch(function (error) {
 			console.log(error);
+		});
+});
+
+app.get('/cf/addressesapi', (req, res) => {
+	const { path = 'moistr.freenods.sbs/free' } = req.query;
+	const config = {
+		method: 'get',
+		url: `https://${path}`,
+		params: { host: 'my.host', uuid: 'my-uuid' },
+	};
+	axios(config)
+		.then(function (response) {
+			res.send(
+				(() => {
+					const result = Buffer.from(response.data, 'base64')
+						.toString()
+						.split('\n')
+						.map((vlessUrl) => {
+							const { host, hash } = url.parse(vlessUrl, true);
+							return host && hash ? `${host}${hash}` : '';
+						})
+						.filter(Boolean)
+						.join('\n');
+					res.setHeader('Content-Type', 'text/plain');
+					return result;
+				})()
+			);
+		})
+		.catch(function () {
+			res.setHeader('Content-Type', 'text/plain');
+			res.send('Error');
 		});
 });
 
