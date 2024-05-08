@@ -151,7 +151,7 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 });
 
 app.get('/cf/addressesapi', (req, res) => {
-	const { path = 'moistr.freenods.sbs/free', type = 'custom' } = req.query;
+	const { path = 'moistr.freenods.sbs/free', type = 'original' } = req.query;
 	const config = {
 		method: 'get',
 		url: `https://${path}`,
@@ -168,7 +168,9 @@ app.get('/cf/addressesapi', (req, res) => {
 							const { host, hash, query, hostname } = url.parse(vlessUrl, true);
 							const [name, area] =
 								decodeURI((hash || '').replace(/^\#/, '')).match(
-									type === 'custom' ? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲)/ : /.*/
+									type === 'custom'
+										? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP)/
+										: /.*/
 								) || [];
 							return host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
 								? `${host}#${area ? `${hostname} - ${area}` : name}`
