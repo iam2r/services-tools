@@ -173,7 +173,7 @@ app.get('/cf/addressesapi', (req, res) => {
 										: /.*/
 								) || [];
 							return host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
-								? `${host}#${area ? `${hostname} - ${area}` : name}`
+								? `${host}#${area ? `${hostname}-${area}` : name}`
 								: '';
 						})
 						.filter(Boolean)
