@@ -169,7 +169,7 @@ app.get('/cf/addressesapi', (req, res) => {
 							const [name, area] =
 								decodeURI((hash || '').replace(/^\#/, '')).match(
 									type === 'custom'
-										? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP)/
+										? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA)/i
 										: /.*/
 								) || [];
 							return host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
