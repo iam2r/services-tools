@@ -165,7 +165,7 @@ app.get('/cf/addressesapi', (req, res) => {
 						.toString()
 						.split('\n')
 						.map((vlessUrl) => {
-							const { host, hash, query, hostname } = url.parse(vlessUrl, true);
+							const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
 							const [name, area] =
 								decodeURI((hash || '').replace(/^\#/, '')).match(
 									type === 'custom'
@@ -173,7 +173,7 @@ app.get('/cf/addressesapi', (req, res) => {
 										: /.*/
 								) || [];
 							return host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
-								? `${host}#${area ? `${hostname}-${area}` : name}`
+								? `${host}#${area ? `${hostname}:${port} - ${area}` : name}`
 								: '';
 						})
 						.filter(Boolean)
