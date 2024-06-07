@@ -161,29 +161,28 @@ app.get('/cf/addressesapi', (req, res) => {
 		.then(function (response) {
 			res.send(
 				(() => {
-					const acc = [];
-					const result = Buffer.from(response.data, 'base64')
-						.toString()
-						.split('\n')
-						.map((vlessUrl, i) => {
-							const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
-							const [name, area] =
-								decodeURI((hash || '').replace(/^\#/, '')).match(
-									type === 'custom'
-										? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA)/i
-										: /.*/
-								) || [];
-							const formattedString =
-								host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
-									? `${host}#${area ? `${hostname}:${port} - ${area}` : name}`
-									: '';
-							if (formattedString && !acc.includes(formattedString)) {
-								acc.push(formattedString);
-							}
-							return `${formattedString}${acc.includes(formattedString) ? `-${i}` : ''}`;
-						})
-						.filter(Boolean)
-						.join('\n');
+					const result = [
+						...new Set(
+							Buffer.from(response.data, 'base64')
+								.toString()
+								.split('\n')
+								.map((vlessUrl, i) => {
+									const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
+									const [name, area] =
+										decodeURI((hash || '').replace(/^\#/, '')).match(
+											type === 'custom'
+												? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA)/i
+												: /.*/
+										) || [];
+									const formattedString =
+										host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
+											? `${host}#${area ? `${hostname}:${port} - ${area}` : name}`
+											: '';
+									return formattedString;
+								})
+								.filter(Boolean)
+						),
+					].join('\n');
 					res.setHeader('Content-Type', 'text/plain');
 					return result;
 				})()
