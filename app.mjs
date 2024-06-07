@@ -176,7 +176,7 @@ app.get('/cf/addressesapi', (req, res) => {
 								host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
 									? `${host}#${area ? `${hostname}:${port} - ${area}` : name}`
 									: '';
-							return formattedString ? { formattedString, host } : null;
+							return formattedString;
 						})
 						.filter(Boolean)
 						.join('\n');
