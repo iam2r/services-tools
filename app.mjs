@@ -157,6 +157,10 @@ app.get('/cf/addressesapi', (req, res) => {
 		url: `https://${path}`,
 		params: { host: 'my.host', uuid: 'my-uuid' },
 	};
+	const getHost = (str) => str.split('#')?.[0];
+	const uniqueByHost = (item, index, array) => {
+		return array.map((it) => getHost(it)).indexOf(getHost(item)) === index;
+	};
 	axios(config)
 		.then(function (response) {
 			res.send(
@@ -179,6 +183,7 @@ app.get('/cf/addressesapi', (req, res) => {
 							return formattedString;
 						})
 						.filter(Boolean)
+						.filter(uniqueByHost)
 						.join('\n');
 					res.setHeader('Content-Type', 'text/plain');
 					return result;
