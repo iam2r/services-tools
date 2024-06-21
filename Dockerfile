@@ -3,10 +3,10 @@ FROM vinlic/kimi-free-api:latest as kimi
 FROM node:18
 ENV APP_HOME /node/app
 WORKDIR $APP_HOME
-RUN pnpm i pm2 -g
+RUN yarn global add pm2 pnpm
 RUN mkdir -p ./logs
 COPY package*.json yarn*.lock pnpm-lock.yaml $APP_HOME/
-RUN pnpm i
+RUN pnpm install
 COPY . $APP_HOME/
 
 COPY --from=gemini2chatgpt . /gemini2chatgpt
