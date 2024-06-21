@@ -10,7 +10,7 @@
 		"coze": "tsx watch src/coze/app.mjs"
 	},
 	"lint-staged": {
-		"*": "yarn prettier"
+		"*": "pnpm prettier"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^17.0.2",
