@@ -150,51 +150,56 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 		});
 });
 
-app.get('/cf/addressesapi', (req, res) => {
-	const { path = 'moistr.freenods.sbs/free', type = 'original' } = req.query;
-	const config = {
-		method: 'get',
-		url: `https://${path}`,
-		params: { host: 'my.host', uuid: 'my-uuid' },
-	};
-	const getHost = (str) => str.split('#')?.[0];
-	const uniqueByHost = (item, index, array) => {
-		return array.map((it) => getHost(it)).indexOf(getHost(item)) === index;
-	};
-	axios(config)
-		.then(function (response) {
-			res.send(
-				(() => {
-					const result = Buffer.from(response.data, 'base64')
-						.toString()
-						.split('\n')
-						.map((vlessUrl) => {
-							const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
-							const [name, area] =
-								decodeURI((hash || '').replace(/^\#/, '')).match(
-									type === 'custom'
-										? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA)/i
-										: /.*/
-								) || [];
-							const formattedString =
-								host && name && query.security === 'tls' && !/(tg|更新)/i.test(name)
-									? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
-									: '';
-							return formattedString;
-						})
-						.filter(Boolean)
-						.filter(uniqueByHost)
-						.join('\n');
-					res.setHeader('Content-Type', 'text/plain');
-					return result;
-				})()
-			);
-		})
-		.catch(function (error) {
-			console.log(error);
-			res.setHeader('Content-Type', 'text/plain');
-			res.send('Error');
-		});
+app.get('/cf/addressesapi', async (req, res) => {
+	try {
+		const { path = 'sub.xf.free.hr/auto', type = 'original' } = req.query;
+		const config = {
+			method: 'get',
+			url: `https://${path}`,
+			params: { host: 'my.host', uuid: '56ddc8b9-5343-41e7-8500-4ff79f5deb92' },
+		};
+		const getHost = ({ formattedString, port }) => `${formattedString.split('#')?.[0]}:${port}`;
+		const uniqueByHost = (item, index, array) => {
+			return array.map((it) => getHost(it)).indexOf(getHost(item)) === index;
+		};
+		const response = await axios(config);
+
+		res.send(
+			(() => {
+				const result = Buffer.from(response.data, 'base64')
+					.toString()
+					.split('\n')
+					.map((vlessUrl) => {
+						const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
+						const [name, area] =
+							decodeURI((hash || '').replace(/^\#/, '')).match(
+								type === 'custom'
+									? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|德国|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA|HKG|TOKYO|SINGAPORE|TAIPEI)/i
+									: /.*/
+							) || [];
+						const formattedString =
+							host && name && query.security === 'tls' && !/(tg|更新|error)/i.test(name) && !/(undefined)/i.test(hash || '')
+								? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
+								: '';
+
+						return {
+							formattedString,
+							port,
+						};
+					})
+					.filter((item) => item.formattedString)
+					.filter(uniqueByHost)
+					.map((it) => it.formattedString)
+					.join('\n');
+				res.setHeader('Content-Type', 'text/plain');
+				return result;
+			})()
+		);
+	} catch (error) {
+		console.log(error);
+		res.setHeader('Content-Type', 'text/plain');
+		res.send('Error');
+	}
 });
 
 async function fileToGenerativePart(file) {
