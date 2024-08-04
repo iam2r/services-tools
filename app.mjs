@@ -178,7 +178,7 @@ app.get('/cf/addressesapi', async (req, res) => {
 									: /.*/
 							) || [];
 						const formattedString =
-							host && name && query.security === 'tls' && !/(tg|更新|error|教程)/i.test(name) && !/(undefined)/i.test(hash || '')
+							host && name && query.security === 'tls' && !/(tg|更新|error|教程|channel)/i.test(name) && !/(undefined)/i.test(hash || '')
 								? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
 								: '';
 
