@@ -7,6 +7,7 @@ import cors from 'cors';
 import lodash from 'lodash';
 import axios from 'axios';
 import url from 'url';
+import fs from 'fs';
 
 const app = express();
 const storage = multer.memoryStorage();
@@ -103,6 +104,18 @@ const createKimiOptions = (useSearch = false) => {
 
 app.get('/healthcheck', (req, res) => {
 	res.status(200).json({ status: 'OK' });
+});
+
+app.get('/cf/ip', (req, res) => {
+	try {
+		const result = fs.readFileSync('./ip.txt').toString();
+		res.setHeader('Content-Type', 'text/plain');
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+		res.setHeader('Content-Type', 'text/plain');
+		res.send('Error');
+	}
 });
 
 app.get('/cf/get_optimization_ip', (req, res) => {
