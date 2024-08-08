@@ -1,5 +1,3 @@
-FROM sxz799/gemini2chatgpt as gemini2chatgpt
-FROM vinlic/kimi-free-api:latest as kimi
 FROM node:18
 ENV APP_HOME /node/app
 WORKDIR $APP_HOME
@@ -8,9 +6,6 @@ RUN mkdir -p ./logs
 COPY package*.json yarn*.lock pnpm-lock.yaml $APP_HOME/
 RUN pnpm install
 COPY . $APP_HOME/
-
-COPY --from=gemini2chatgpt . /gemini2chatgpt
-COPY --from=kimi . /kimi
 
 EXPOSE 3000
 
