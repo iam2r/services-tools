@@ -1,8 +1,4 @@
 fbi.gov#fbi.gov - 443
-138.2.104.102#SIN-Asia-Pacific-Singapore
-47.242.176.185#HKG-Asia-Pacific-HongKong
-192.9.177.204#SYD-Oceania-Sydney
-
 
 
 
