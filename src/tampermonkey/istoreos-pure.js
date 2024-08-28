@@ -32,6 +32,32 @@
 	function actionsElements(
 		parent = document,
 		selectors = [
+			//登录页
+			...[
+				//页脚隐藏
+				{
+					selector: '.login-container footer',
+				},
+			],
+			//主页面
+			...[
+				//隐藏头部istore官网
+				{
+					selector: 'a[href^="https://www.istoreos.com"]',
+				},
+				//页脚隐藏
+				{
+					selector: '#maincontent footer > *',
+				},
+				//隐藏quickstart面板问号引导
+				{
+					selector: '.app-container_title >span > a',
+				},
+				//隐藏状态-概览页的易有云
+				{
+					selector: '#linkease_status',
+				},
+			],
 			//存储服务
 			...[
 				//改存储服务模块的易有云到文件管理器
@@ -69,7 +95,7 @@
 									return element.innerText.includes('易有云');
 								},
 								action: (element) => {
-									element.innerText = '文件管理器';
+									element.innerText = i18n.t('files');
 								},
 							},
 						]);
@@ -83,7 +109,7 @@
 					},
 					action: (element) => {
 						element.setAttribute('href', '/cgi-bin/luci/admin/services/linkease/file');
-						element.innerText = '文件管理器';
+						element.innerText = i18n.t('files');
 					},
 				},
 				//隐藏存储服务模块的易有云推广
@@ -212,17 +238,21 @@
 			],
 		]
 	) {
-		selectors.forEach(({ selector, filterFun, action }) => {
-			if (parent && parent.querySelectorAll) {
-				const elements = [...(parent.querySelectorAll(selector) || [])].filter(filterFun);
-				action =
-					action ||
-					((element) => {
-						element.style.display = 'none';
-					});
-				elements.forEach(action);
+		selectors.forEach(
+			({
+				selector,
+				filterFun = () => true,
+				action = (element) => {
+					element.style.display = 'none';
+				},
+			}) => {
+				if (parent && parent.querySelectorAll) {
+					const elements = [...(parent.querySelectorAll(selector) || [])].filter(filterFun);
+
+					elements.forEach(action);
+				}
 			}
-		});
+		);
 	}
 
 	// 监听 DOM 变化

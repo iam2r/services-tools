@@ -7,6 +7,7 @@ import cors from 'cors';
 import lodash from 'lodash';
 import axios from 'axios';
 import url from 'url';
+import cron from 'node-cron';
 
 const app = express();
 const storage = multer.memoryStorage();
@@ -255,10 +256,29 @@ const keepAlive = () => {
 	if (!process.env.KEEP_ALIVE_URLS) return;
 	const urls = (process.env.KEEP_ALIVE_URLS || '').split(',');
 	if (urls.length) {
-		console.log(`${process.env.KEEP_ALIVE_URLS} is keepalive !`);
-		setInterval(() => {
-			Promise.all(urls.map((url) => fetch(url)));
-		}, 60 * 1000 * 5);
+		let job = null;
+		// 每天重新生成随机时间并创建新的 cron 任务
+		const scheduleJob = () => {
+			if (job) {
+				job.stop(); // 停止上一次的 cron 任务
+			}
+			const randomHour = Math.floor(Math.random() * 24);
+			const randomMinute = Math.floor(Math.random() * 60);
+			const cronString = `0 ${randomMinute} ${randomHour} * * *`;
+			console.log(`${process.env.KEEP_ALIVE_URLS} is keepalive with ${cronString}!`);
+			job = cron.schedule(cronString, () => {
+				Promise.all(urls.map((url) => fetch(url)))
+					.then(() => console.log('Keep-alive requests sent successfully'))
+					.catch((error) => console.error('Error sending keep-alive requests:', error));
+			});
+
+			job.start();
+
+			// 每天重新创建任务
+			setTimeout(scheduleJob, 24 * 60 * 60 * 1000); // 24 小时后重新创建任务
+		};
+
+		scheduleJob();
 	}
 };
 
