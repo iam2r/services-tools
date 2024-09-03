@@ -1,6 +1,3 @@
 fbi.gov#fbi.gov - 443
-
-
-
-
-
+conrad.ns.cloudflare.com#conrad.ns.cloudflare.com - 443
+kira.ns.cloudflare.com#kira.ns.cloudflare.com - 443 
