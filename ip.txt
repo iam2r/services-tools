@@ -1,4 +1,26 @@
 fbi.gov#fbi.gov - 443
+alan.ns.cloudflare.com
+alaric.ns.cloudflare.com
+albert.ns.cloudflare.com
+alberto.ns.cloudflare.com
+aldo.ns.cloudflare.com
+alec.ns.cloudflare.com
+aleena.ns.cloudflare.com
+alexandra.ns.cloudflare.com
+alexis.ns.cloudflare.com
+alfred.ns.cloudflare.com
+algin.ns.cloudflare.com
+alist.qyide.com
+alist.xf110.cloudns.biz
+alist.xf110.cloudns.org
+amir.ns.cloudflare.com
+amit.ns.cloudflare.com
+amos.ns.cloudflare.com
+anahi.ns.cloudflare.com
+anastasia.ns.cloudflare.com
+anderson.ns.cloudflare.com
+andronicus.ns.cloudflare.com
+andy.ns.cloudflare.com
 
 
 
