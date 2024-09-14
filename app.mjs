@@ -153,7 +153,7 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 
 app.get('/cf/addressesapi', async (req, res) => {
 	try {
-		const { path = 'sub.xf.free.hr/auto', type = 'original' } = req.query;
+		const { path = 'sub.xf.free.hr/auto', type = 'original', security = '' } = req.query;
 		const config = {
 			method: 'get',
 			url: `https://${path}`,
@@ -181,8 +181,8 @@ app.get('/cf/addressesapi', async (req, res) => {
 						const formattedString =
 							host &&
 							name &&
-							query.security === 'tls' &&
-							!/(tg|更新|error|教程|channel|频道|收费)/i.test(name) &&
+							(security === 'tls' ? query.security === 'tls' : true) &&
+							!/(tg|更新|error|教程|channel|频道|收费|群组)/i.test(name) &&
 							!/(undefined)/i.test(hash || '')
 								? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
 								: '';
