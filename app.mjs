@@ -151,14 +151,36 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 		});
 });
 
+/**
+ * 获取地址列表 API
+ *
+ * @param {object} req - 请求对象
+ * @param {object} res - 响应对象
+ *
+ * @example
+ * ```
+ * curl http://localhost:3000/cf/addressesapi?path=sub.xf.free.hr/auto&type=original&security=
+ * ```
+ */
 app.get('/cf/addressesapi', async (req, res) => {
 	try {
-		const { path = 'sub.xf.free.hr/auto', type = 'original', security = '' } = req.query;
+		/**
+		 * 请求参数
+		 * @type {object}ßß
+		 * @property {string} path - 地址列表路径
+		 * @property {string} type - 地址类型，可选值为 'original' 或 'custom' 或 ‘pure’
+		 * @property {string} security - 安全类型，可选值为 'tls'
+		 */
+		const { path = 'sub.xf.free.hr/sub', type = 'pure', security = '', autoQuery = 'true' } = req.query;
+		const _url = /^http(s?):\/\//.test(path) ? path : `https://${path}`;
 		const config = {
 			method: 'get',
-			url: `https://${path}`,
-			params: { host: 'my.host', uuid: '56ddc8b9-5343-41e7-8500-4ff79f5deb92' },
+			url: _url,
+			params: autoQuery === 'true' ? { host: 'my.host', uuid: '56ddc8b9-5343-41e7-8500-4ff79f5deb92' } : {},
 		};
+
+		const isPureMode = type === 'pure';
+		const isCustom = type === 'custom';
 		const getHost = ({ formattedString, port }) => `${formattedString.split('#')?.[0]}:${port}`;
 		const uniqueByHost = (item, index, array) => {
 			return array.map((it) => getHost(it)).indexOf(getHost(item)) === index;
@@ -170,22 +192,39 @@ app.get('/cf/addressesapi', async (req, res) => {
 				const result = Buffer.from(response.data, 'base64')
 					.toString()
 					.split('\n')
+					.filter(Boolean)
 					.map((vlessUrl) => {
 						const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
-						const [name, area] =
-							decodeURI((hash || '').replace(/^\#/, '')).match(
-								type === 'custom'
-									? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|法国|荷兰|波兰|芬兰|德国|都柏林|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA|HKG|TOKYO|SINGAPORE|TAIPEI|PL)/i
+						const name = decodeURI((hash || '').replace(/^\#/, ''));
+						const [, area] =
+							name.match(
+								isCustom
+									? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|法国|荷兰|波兰|芬兰|德国|都柏林|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA|HKG|TOKYO|SINGAPORE|TAIPEI|PL|FR)/i
 									: /.*/
 							) || [];
-						const formattedString =
-							host &&
-							name &&
-							(security === 'tls' ? query.security === 'tls' : true) &&
-							!/(tg|更新|error|教程|channel|频道|收费|群组)/i.test(name) &&
-							!/(undefined)/i.test(hash || '')
-								? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
-								: '';
+						const rules = [
+							/**
+							 * 存在 host 和 name
+							 */
+							Boolean(host) && Boolean(name),
+							/**
+							 * hash 和 name 都不含 undefined error
+							 */
+							[hash, name].every((it) => !/(undefined|error)/i.test(it || '')),
+							/**
+							 * 纯净模式时不可以包含一些推广关键字
+							 */
+							...(isPureMode || (isCustom && !area) ? [!/(tg|更新|教程|channel|频道|收费|群组|Author)/i.test(name)] : []),
+
+							/**
+							 * 开启 https 筛选时必须开启tlsß
+							 */
+							...(security === 'tls' ? [query.security === 'tls'] : []),
+						];
+
+						const formattedString = rules.every(Boolean)
+							? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
+							: '';
 
 						return {
 							formattedString,
