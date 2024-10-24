@@ -30,6 +30,7 @@ const createOpenAIHandle =
 
 app.use(cors());
 app.use(express.json());
+app.use('/static', express.static('public'));
 
 const createBaseAuthorizationHandler = (token) => (req) => {
 	if (req.headers.authorization === `Bearer ${process.env.ACCESS_CODE}` && token) {
