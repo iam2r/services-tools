@@ -1,4 +1,4 @@
-import './config.js';
+import './config.cjs';
 import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import cors from 'cors';

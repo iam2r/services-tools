@@ -1,11 +1,13 @@
 {
 	"name": "openai-tools",
+	"type": "module",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
-		"start": "tsx watch app.mjs"
+		"start": "tsx watch app.js",
+		"start:hono": "tsx watch src/index.tsx"
 	},
 	"lint-staged": {
 		"*": "pnpm prettier"
@@ -13,18 +15,20 @@
 	"devDependencies": {
 		"@commitlint/cli": "^17.0.2",
 		"@commitlint/config-conventional": "^17.0.2",
+		"@types/node": "^22.7.9",
 		"cross-env": "^7.0.3",
 		"dotenv-defaults": "^5.0.2",
 		"husky": "^8.0.3",
 		"lint-staged": "^13.2.3",
 		"prettier": "^2.6.2",
-		"tsx": "^4.7.2",
-		"typescript": "^5.3.3"
+		"tsx": "^4.7.2"
 	},
 	"dependencies": {
+		"@hono/node-server": "^1.13.2",
 		"axios": "^1.6.7",
 		"cors": "^2.8.5",
 		"express": "^4.18.2",
+		"hono": "^4.6.6",
 		"http-proxy-middleware": "^2.0.6",
 		"lodash": "^4.17.21",
 		"node-cron": "^3.0.3"
