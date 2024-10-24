@@ -1,8 +1,7 @@
-import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { type FC } from 'hono/jsx';
-import { DemoContext } from './context/index.js';
-import { AsyncComponent } from './async-fc/index.js';
+import { DemoContext } from '@/routes/demo/context/index.tsx';
+import { AsyncComponent } from '@/routes/demo/async-fc/index.js';
 
 const demo = new Hono();
 

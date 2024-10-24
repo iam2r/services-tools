@@ -1,11 +1,12 @@
-import '../config.cjs';
+import 'config.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
-import router from './routes/index.ts';
-import { scheduleTasks } from './utils/schedule-tasks.ts';
+import router from '@/routes/index.ts';
+import { scheduleTasks } from '@/utils/schedule-tasks.ts';
+import { startLog } from '@/utils/start-log.ts';
 
 const app = new Hono();
 app
@@ -18,15 +19,10 @@ app
 	.route('/', router);
 
 const port = 3000;
-console.log('📝 Author: Razo');
-console.log('🌍 GitHub Repository: https://github.com/iam2r/openai-tools');
-console.log(`💖 Don't forget to star the repository if you like this project!`);
-console.log();
-console.log(`Server is running at http://localhost:${port}`);
 
 serve({
 	fetch: app.fetch,
 	port,
 });
-
+startLog(port);
 scheduleTasks();
