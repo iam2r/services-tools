@@ -1,12 +1,13 @@
 {
-	"name": "openai-tools",
+	"name": "services-tools",
 	"type": "module",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
-		"start": "tsx watch app.js",
+		"start": "tsx watch src/index.tsx",
+		"start:express": "tsx watch src/index.tsx",
 		"start:hono:demo": "tsx watch src/demo/index.tsx"
 	},
 	"lint-staged": {
@@ -16,6 +17,7 @@
 		"@commitlint/cli": "^17.0.2",
 		"@commitlint/config-conventional": "^17.0.2",
 		"@types/node": "^22.7.9",
+		"@types/node-cron": "^3.0.11",
 		"cross-env": "^7.0.3",
 		"dotenv-defaults": "^5.0.2",
 		"husky": "^8.0.3",

@@ -62,53 +62,6 @@ const createBaseAuthorizationHandler = (token) => (req) => {
 	app.use(`/${prefix}`, createOpenAIHandle(options));
 });
 
-app.get('/cf/get_optimization_ip', (req, res) => {
-	const { format = 'normal', type = 'v4' } = req.query;
-	const config = {
-		method: 'post',
-		url: 'https://api.hostmonit.com/get_optimization_ip',
-		headers: {
-			accept: 'application/json, text/plain, */*',
-			'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
-			'content-type': 'application/json',
-			origin: 'https://stock.hostmonit.com',
-			priority: 'u=1, i',
-			referer: 'https://stock.hostmonit.com/',
-			'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-			'sec-ch-ua-mobile': '?0',
-			'sec-ch-ua-platform': '"Windows"',
-			'sec-fetch-dest': 'empty',
-			'sec-fetch-mode': 'cors',
-			'sec-fetch-site': 'same-site',
-			'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-		},
-		data: { key: 'iDetkOys', type },
-	};
-	axios(config)
-		.then(function (response) {
-			if (response.data?.code === 200) {
-				format === 'small'
-					? res.send(
-							(() => {
-								const result = (response.data.info || [])
-									.map(({ ip, node }, i) => {
-										return `${type === 'v6' ? `[${ip}]` : ip}#${node} - IP${type} - ${i + 1}`;
-									})
-									.join('\n');
-								res.setHeader('Content-Type', 'text/plain');
-								return result;
-							})()
-					  )
-					: res.json(response.data.info);
-			}
-		})
-		.catch(function () {
-			/**
-			 *
-			 */
-		});
-});
-
 /**
  * 获取地址列表 API
  *

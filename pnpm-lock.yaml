@@ -41,6 +41,9 @@ importers:
       '@types/node':
         specifier: ^22.7.9
         version: 22.7.9
+      '@types/node-cron':
+        specifier: ^3.0.11
+        version: 3.0.11
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -317,6 +320,9 @@ packages:
 
   '@types/minimist@1.2.5':
     resolution: { integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag== }
+
+  '@types/node-cron@3.0.11':
+    resolution: { integrity: sha512-0ikrnug3/IyneSHqCBeslAhlK2aBfYek1fGo4bP4QnZPmiqSGRK+Oy7ZMisLWkesffJvQ1cqAcBnJC+8+nxIAg== }
 
   '@types/node@20.5.1':
     resolution: { integrity: sha512-4tT2UrL5LBqDwoed9wZ6N3umC4Yhz3W3FloMmiiG4JwmUJWpie0c7lcnUNd4gtMKuDEO4wRVS8B6Xa0uMRsMKg== }
@@ -1745,6 +1751,8 @@ snapshots:
       '@types/node': 22.7.9
 
   '@types/minimist@1.2.5': {}
+
+  '@types/node-cron@3.0.11': {}
 
   '@types/node@20.5.1': {}
 
