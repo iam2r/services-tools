@@ -1,6 +1,8 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { type FC } from 'hono/jsx';
+import { DemoContext } from './context/index.js';
+import { AsyncComponent } from './async-fc/index.js';
 
 const app = new Hono();
 
@@ -28,6 +30,18 @@ const Top: FC<{ messages: string[] }> = (props: { messages: string[] }) => {
 app.get('/', (c) => {
 	const messages = ['Good Morning', 'Good Evening', 'Good Night'];
 	return c.html(<Top messages={messages} />);
+});
+
+app.get('/demo/:name', (c) => {
+	const { name } = c.req.param();
+	switch (name) {
+		case 'context':
+			return c.html(<DemoContext />);
+		case 'async-fc':
+			return c.html(<AsyncComponent />);
+		default:
+			return c.html(<Top messages={['Demo']} />);
+	}
 });
 
 const port = 3000;

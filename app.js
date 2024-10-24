@@ -101,8 +101,10 @@ app.get('/cf/get_optimization_ip', (req, res) => {
 					: res.json(response.data.info);
 			}
 		})
-		.catch(function (error) {
-			console.log(error);
+		.catch(function () {
+			/**
+			 *
+			 */
 		});
 });
 
@@ -195,7 +197,6 @@ app.get('/cf/addressesapi', async (req, res) => {
 			})()
 		);
 	} catch (error) {
-		console.log(error);
 		res.setHeader('Content-Type', 'text/plain');
 		res.send('Error');
 	}
@@ -204,6 +205,7 @@ app.get('/cf/addressesapi', async (req, res) => {
 app.get('/healthcheck', (req, res) => {
 	res.status(200).json({ status: 'OK' });
 });
+
 app.listen(port, () => {
 	console.log('📝 Author: Razo');
 	console.log('🌍 GitHub Repository: https://github.com/iam2r/openai-tools');
