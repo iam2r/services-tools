@@ -6,9 +6,8 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
-		"start": "tsx watch src/index.tsx",
-		"start:express": "tsx watch src/index.tsx",
-		"start:hono:demo": "tsx watch src/demo/index.tsx"
+		"start": "tsx watch src/index.ts",
+		"start:express": "tsx watch app.js"
 	},
 	"lint-staged": {
 		"*": "pnpm prettier"

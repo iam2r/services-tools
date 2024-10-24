@@ -4,7 +4,7 @@ import { type FC } from 'hono/jsx';
 import { DemoContext } from './context/index.js';
 import { AsyncComponent } from './async-fc/index.js';
 
-const app = new Hono();
+const demo = new Hono();
 
 const Layout: FC = (props) => {
 	return (
@@ -27,12 +27,12 @@ const Top: FC<{ messages: string[] }> = (props: { messages: string[] }) => {
 	);
 };
 
-app.get('/', (c) => {
+demo.get('/', (c) => {
 	const messages = ['Good Morning', 'Good Evening', 'Good Night'];
 	return c.html(<Top messages={messages} />);
 });
 
-app.get('/demo/:name', (c) => {
+demo.get('/:name', (c) => {
 	const { name } = c.req.param();
 	switch (name) {
 		case 'context':
@@ -44,14 +44,4 @@ app.get('/demo/:name', (c) => {
 	}
 });
 
-const port = 3000;
-console.log('📝 Author: Razo');
-console.log('🌍 GitHub Repository: https://github.com/iam2r/openai-tools');
-console.log(`💖 Don't forget to star the repository if you like this project!`);
-console.log();
-console.log(`Server is running at http://localhost:${port}`);
-
-serve({
-	fetch: app.fetch,
-	port,
-});
+export default demo;
