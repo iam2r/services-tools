@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { type FC } from 'hono/jsx';
 import { DemoContext } from '@/routes/demo/context/index.tsx';
 import { AsyncComponent } from '@/routes/demo/async-fc/index.js';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
 
 const demo = new Hono();
 
@@ -26,21 +28,30 @@ const Top: FC<{ messages: string[] }> = (props: { messages: string[] }) => {
 	);
 };
 
-demo.get('/', (c) => {
-	const messages = ['Good Morning', 'Good Evening', 'Good Night'];
-	return c.html(<Top messages={messages} />);
-});
-
-demo.get('/:name', (c) => {
-	const { name } = c.req.param();
-	switch (name) {
-		case 'context':
-			return c.html(<DemoContext />);
-		case 'async-fc':
-			return c.html(<AsyncComponent />);
-		default:
-			return c.html(<Top messages={['Demo']} />);
-	}
-});
+demo
+	.get(
+		'/:name',
+		zValidator(
+			'param',
+			z.object({
+				name: z.enum(['context', 'async-fc']),
+			})
+		),
+		(c) => {
+			const { name } = c.req.valid('param');
+			switch (name) {
+				case 'context':
+					return c.html(<DemoContext />);
+				case 'async-fc':
+					return c.html(<AsyncComponent />);
+				default:
+					return c.html(<Top messages={['Demo']} />);
+			}
+		}
+	)
+	.get('/*', (c) => {
+		const messages = ['Good Morning', 'Good Evening', 'Good Night'];
+		return c.html(<Top messages={messages} />);
+	});
 
 export default demo;

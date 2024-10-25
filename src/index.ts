@@ -4,6 +4,7 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
+import { prettyJSON } from 'hono/pretty-json';
 import router from '@/routes/index.ts';
 import { scheduleTasks } from '@/utils/schedule-tasks.ts';
 import { startLog } from '@/utils/start-log.ts';
@@ -11,6 +12,7 @@ import { startLog } from '@/utils/start-log.ts';
 const app = new Hono();
 app
 	.use(logger())
+	.use(prettyJSON())
 	.use('*', cors())
 	.use('/static/*', serveStatic({ root: './', rewriteRequestPath: (path) => path.replace(/^\/static/, '/public') }))
 	.get('/ping', (c) => {

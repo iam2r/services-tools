@@ -25,7 +25,9 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.13.2",
+		"@hono/zod-validator": "^0.4.1",
 		"hono": "^4.6.6",
-		"node-cron": "^3.0.3"
+		"node-cron": "^3.0.3",
+		"zod": "^3.23.8"
 	}
 }
