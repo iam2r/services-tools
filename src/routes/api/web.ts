@@ -6,19 +6,30 @@ import { omit } from 'lodash-es';
 const web = new Hono();
 
 const manifestSchema = z.object({
-	base64EncodedJSON: z.string().optional(),
-	icon: z.string().default('https://placehold.co/{size}/EEE/31343C?text={short_name}&font=oswald'),
-	name: z.string().default('{name}'),
-	short_name: z.string().default('{name}'),
+	custom_base64_encoded_json: z.string().optional(),
+	custom_icon: z
+		.string()
+		.default('https://placehold.co/{size}/{custom_icon_color}/{custom_icon_text_color}?text={short_name}&font={custom_icon_text_font}'),
+	custom_icon_text_font: z.enum(['oswald']).default('oswald'),
+	custom_icon_color: z
+		.string()
+		.regex(/^[0-9a-fA-F]{6}$/)
+		.default('EEEEEE'),
+	custom_icon_text_color: z
+		.string()
+		.regex(/^[0-9a-fA-F]{6}$/)
+		.default('31343C'),
+	name: z.string().default('MyApp'),
+	short_name: z.string().optional(),
 	start_url: z.string().default('/'),
 	theme_color: z
 		.string()
-		.regex(/^#[0-9a-fA-F]{6}$/)
-		.default('#ffffff'),
+		.regex(/^[0-9a-fA-F]{6}$/)
+		.default('ffffff'),
 	background_color: z
 		.string()
-		.regex(/^#[0-9a-fA-F]{6}$/)
-		.default('#ffffff'),
+		.regex(/^[0-9a-fA-F]{6}$/)
+		.default('ffffff'),
 	display: z.enum(['standalone', 'fullscreen', 'minimal-ui']).default('standalone'),
 });
 const serviceWorkerRegisterSchema = z.object({
@@ -28,27 +39,44 @@ web
 	.basePath('/pwa')
 	.get('/manifest', zValidator('query', manifestSchema), async (c) => {
 		const query = c.req.valid('query');
-		const name = query.name.replace('{name}', 'MyApp');
-		const short_name = query.short_name.replace('{name}', name);
-		const validatedData = omit(manifestSchema.parse(query), ['base64EncodedJSON', 'icon']);
-		Object.assign(validatedData, {
+		const {
 			name,
-			short_name,
-		});
+			custom_icon,
+			custom_icon_text_font,
+			custom_icon_text_color,
+			custom_icon_color,
+			custom_base64_encoded_json,
+			theme_color,
+			background_color,
+		} = query;
+		const short_name = query.short_name || name;
+		const parseParams = manifestSchema.parse(query);
+		const validatedData = omit(
+			parseParams,
+			Object.keys(parseParams).filter((key) => /^custom_/.test(key))
+		);
+		Object.assign(validatedData, { short_name, theme_color: `#${theme_color}`, background_color: `#${background_color}` });
 		try {
-			if (query.icon) {
+			if (custom_icon) {
 				Object.assign(validatedData, {
 					icons: [192, 512, 1024].map((size) => {
+						const src = custom_icon
+							.replace('{size}', String(size))
+							.replace('{short_name}', short_name)
+							.replace('{custom_icon_color}', custom_icon_color)
+							.replace('{custom_icon_text_color}', custom_icon_text_color)
+							.replace('{custom_icon_text_font}', custom_icon_text_font);
+
 						return {
-							src: query.icon.replace('{size}', String(size)).replace('{short_name}', short_name),
+							src,
 							sizes: `${size}x${size}`,
 							type: 'image/png',
 						};
 					}),
 				});
 			}
-			if (query.base64EncodedJSON) {
-				const decodedJSON = Buffer.from(query.base64EncodedJSON, 'base64').toString('utf8');
+			if (custom_base64_encoded_json) {
+				const decodedJSON = Buffer.from(custom_base64_encoded_json, 'base64').toString('utf8');
 				const parsedJSON = JSON.parse(decodedJSON);
 				Object.assign(validatedData, parsedJSON);
 			}
