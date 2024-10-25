@@ -17,7 +17,7 @@ app
 		'*',
 		cors({
 			origin: ['*'],
-			allowHeaders: ['Content-Type', 'Authorization'],
+			allowHeaders: ['*'],
 			allowMethods: ['POST', 'GET', 'OPTIONS'],
 			exposeHeaders: ['Content-Length'],
 			maxAge: 600,
