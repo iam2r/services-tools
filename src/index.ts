@@ -13,7 +13,17 @@ const app = new Hono();
 app
 	.use(logger())
 	.use(prettyJSON())
-	.use('*', cors())
+	.use(
+		'*',
+		cors({
+			origin: ['*'],
+			allowHeaders: ['Content-Type', 'Authorization'],
+			allowMethods: ['POST', 'GET', 'OPTIONS'],
+			exposeHeaders: ['Content-Length'],
+			maxAge: 600,
+			credentials: true,
+		})
+	)
 	.use('/static/*', serveStatic({ root: './', rewriteRequestPath: (path) => path.replace(/^\/static/, '/public') }))
 	.get('/ping', (c) => {
 		return c.json({ status: 'pong' });
