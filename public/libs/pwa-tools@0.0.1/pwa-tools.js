@@ -23,6 +23,7 @@
 
 	const createAppleMeta = (name, icons = []) => {
 		setupElement('meta', { name: 'apple-mobile-web-app-capable' }, { content: 'yes' });
+		setupElement('meta', { name: 'mobile-web-app-capable' }, { content: 'yes' });
 		setupElement('meta', { name: 'apple-mobile-web-app-status-bar-style' }, { content: 'default' });
 
 		if (name) {
