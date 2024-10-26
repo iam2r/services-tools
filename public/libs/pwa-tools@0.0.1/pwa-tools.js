@@ -66,6 +66,7 @@
 			link.rel = 'manifest';
 			link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
 			document.head.appendChild(link);
+			return PwaTools;
 		},
 		initManifest(manifestUrl) {
 			fetch(manifestUrl)
@@ -82,6 +83,7 @@
 				.catch((error) => {
 					console.error('There was a problem with the fetch operation:', error);
 				});
+			return PwaTools;
 		},
 		registerThemeColor(light = '#f5f5f5', dark = '#1c1c1e') {
 			const lightMeta = setupElement('meta', { name: 'theme-color', media: '(prefers-color-scheme: light)' }, { content: light });
@@ -100,10 +102,12 @@
 					darkMeta.setAttribute('content', dark);
 				}
 			});
+			return PwaTools;
 		},
 		triggerThemeUpdate(theme) {
 			const event = new CustomEvent('custom-event:updateThemeColor', { detail: theme });
 			document.dispatchEvent(event);
+			return PwaTools;
 		},
 	};
 
