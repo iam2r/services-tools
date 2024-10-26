@@ -1,4 +1,4 @@
-import { app } from '../app2.js';
+import { app } from '../app.js';
 import { handle } from 'hono/vercel';
 
 export const config = {

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import api from '@/routes/api/index.js';
-import demo from '@/routes/demo/index.jsx';
+import api from './api/index.js';
+import demo from './demo/index.jsx';
 
 const router = new Hono();
 

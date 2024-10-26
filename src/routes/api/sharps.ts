@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import sharp from 'sharp';
-import { fetchImage } from '@/utils/fetch-image.js';
+import { fetchImage } from '../../utils/fetch-image.js';
 
 const sharps = new Hono();
 
