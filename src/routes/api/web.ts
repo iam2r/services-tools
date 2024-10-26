@@ -38,6 +38,9 @@ const serviceWorkerRegisterSchema = z.object({
 web
 	.basePath('/pwa')
 	.get('/manifest', zValidator('query', manifestSchema), async (c) => {
+		// 获取当前请求的 URL
+		const url = new URL(c.req.url);
+		const maskableApi = `${url.origin}/api/sharps/macos-icon`;
 		const query = c.req.valid('query');
 		const {
 			name,
@@ -59,20 +62,34 @@ web
 		try {
 			if (custom_icon) {
 				Object.assign(validatedData, {
-					icons: [192, 512, 1024].map((size) => {
-						const src = custom_icon
-							.replace('{size}', String(size))
-							.replace('{short_name}', short_name)
-							.replace('{custom_icon_color}', custom_icon_color)
-							.replace('{custom_icon_text_color}', custom_icon_text_color)
-							.replace('{custom_icon_text_font}', custom_icon_text_font);
+					icons: [192, 512, 1024]
+						.map((size) => {
+							const src = custom_icon
+								.replace('{size}', String(size))
+								.replace('{short_name}', short_name)
+								.replace('{custom_icon_color}', custom_icon_color)
+								.replace('{custom_icon_text_color}', custom_icon_text_color)
+								.replace('{custom_icon_text_font}', custom_icon_text_font);
 
-						return {
-							src,
-							sizes: `${size}x${size}`,
-							type: 'image/png',
-						};
-					}),
+							return [
+								{
+									src,
+									sizes: `${size}x${size}`,
+									type: 'image/png',
+								},
+								...(src.startsWith('http')
+									? [
+											{
+												src: `${maskableApi}?url=${encodeURIComponent(src)}`,
+												sizes: `${size}x${size}`,
+												type: 'image/png',
+												purpose: 'maskable',
+											},
+									  ]
+									: []),
+							];
+						})
+						.flat(),
 				});
 			}
 			if (custom_base64_encoded_json) {

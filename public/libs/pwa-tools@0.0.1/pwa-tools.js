@@ -49,9 +49,11 @@
 				}
 			});
 			manifestData.icons = (manifestData.icons || []).map((it) => {
-				it.src = App.environment().macOS_device
-					? `${App.servicesBase}api/sharps/macos-icon?url=${encodeURIComponent(replace2AbsolutePath(it.src))}`
-					: replace2AbsolutePath(it.src);
+				const src = replace2AbsolutePath(it.src);
+				it.src =
+					it.purpose !== 'maskable' && App.environment().macOS_device
+						? `${App.servicesBase}api/sharps/macos-icon?url=${encodeURIComponent(src)}`
+						: src;
 				return it;
 			});
 			createAppleMeta(manifestData.name, manifestData.icons);
