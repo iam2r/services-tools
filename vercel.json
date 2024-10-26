@@ -1,14 +1,14 @@
 {
 	"builds": [
 		{
-			"src": "src/runtimes/node.ts",
+			"src": "src/runtimes/node.js",
 			"use": "@vercel/node"
 		}
 	],
 	"rewrites": [
 		{
 			"source": "/(.*)",
-			"destination": "/src/runtimes/node.ts"
+			"destination": "/src/runtimes/node.js"
 		}
 	]
 }
