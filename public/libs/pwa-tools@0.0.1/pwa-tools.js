@@ -1,4 +1,11 @@
 (function (context) {
+	const App = {
+		environment: () => ({
+			/* A dynamic property that checks if the user's platform is macOS. This is what I came up with for macOS, but you could use other checks for other platforms as well. */
+			macOS_device: /(Mac)/i.test(navigator.platform) && navigator.standalone === undefined,
+		}),
+		servicesBase: 'https://services-tools.koyeb.app/',
+	};
 	const replace2AbsolutePath = (url) => url.replace(/^\//, new URL(`/`, window.location.origin).href);
 
 	const setupElement = (tagName, conditions, config = {}) => {
@@ -42,7 +49,9 @@
 				}
 			});
 			manifestData.icons = (manifestData.icons || []).map((it) => {
-				it.src = replace2AbsolutePath(it.src);
+				it.src = App.environment().macOS_device
+					? `${App.servicesBase}api/sharps/macos-icon?url=${encodeURIComponent(replace2AbsolutePath(it.src))}`
+					: replace2AbsolutePath(it.src);
 				return it;
 			});
 			createAppleMeta(manifestData.name, manifestData.icons);
