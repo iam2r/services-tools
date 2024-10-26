@@ -11,6 +11,7 @@ const manifestSchema = z.object({
 		.string()
 		.default('https://placehold.co/{size}/{custom_icon_color}/{custom_icon_text_color}?text={short_name}&font={custom_icon_text_font}'),
 	custom_icon_text_font: z.enum(['oswald']).default('oswald'),
+	custom_icon_maskable: z.enum(['true', 'false']).default('false'),
 	custom_icon_color: z
 		.string()
 		.regex(/^[0-9a-fA-F]{6}$/)
@@ -51,6 +52,7 @@ web
 			custom_base64_encoded_json,
 			theme_color,
 			background_color,
+			custom_icon_maskable,
 		} = query;
 		const short_name = query.short_name || name;
 		const parseParams = manifestSchema.parse(query);
@@ -77,7 +79,7 @@ web
 									sizes: `${size}x${size}`,
 									type: 'image/png',
 								},
-								...(src.startsWith('http')
+								...(custom_icon_maskable === 'true' && src.startsWith('http')
 									? [
 											{
 												src: `${maskableApi}?url=${encodeURIComponent(src)}`,
