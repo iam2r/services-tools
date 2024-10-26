@@ -2,7 +2,7 @@
 	const App = {
 		environment: () => ({
 			/* A dynamic property that checks if the user's platform is macOS. This is what I came up with for macOS, but you could use other checks for other platforms as well. */
-			macOS_device: /(Mac)/i.test(navigator.userAgent) && navigator.standalone === undefined,
+			macOS_device: /(Mac)/i.test(navigator.platform) && navigator.standalone === undefined,
 			iOS_device: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
 		}),
 		servicesBase: 'https://services-tools.koyeb.app/',
