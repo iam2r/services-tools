@@ -1,14 +1,14 @@
 {
 	"builds": [
 		{
-			"src": "src/runtime/express.ts",
+			"src": "src/runtime/vercel.ts",
 			"use": "@vercel/node"
 		}
 	],
 	"rewrites": [
 		{
 			"source": "/(.*)",
-			"destination": "/src/runtime/express.ts"
+			"destination": "/src/runtime/vercel.ts"
 		}
 	]
 }
