@@ -27,6 +27,7 @@
 	"dependencies": {
 		"@hono/node-server": "^1.13.2",
 		"@hono/zod-validator": "^0.4.1",
+		"express": "^4.21.1",
 		"hono": "^4.6.6",
 		"lodash-es": "^4.17.21",
 		"node-cron": "^3.0.3",
