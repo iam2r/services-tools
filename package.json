@@ -6,7 +6,7 @@
 	"scripts": {
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
-		"start": "tsx watch src/runtimes/node.ts"
+		"start": "tsx watch src/runtime/node.ts"
 	},
 	"lint-staged": {
 		"*": "pnpm prettier"

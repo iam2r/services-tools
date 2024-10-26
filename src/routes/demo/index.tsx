@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { type FC } from 'hono/jsx';
-import { DemoContext } from '@/routes/demo/context/index.tsx';
+import { DemoContext } from '@/routes/demo/context/index.jsx';
 import { AsyncComponent } from '@/routes/demo/async-fc/index.js';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
