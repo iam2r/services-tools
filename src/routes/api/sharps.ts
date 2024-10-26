@@ -12,7 +12,7 @@ sharps.get('/macos-icon', async (c) => {
 	const resultSize = Number(size);
 	const transparentMargin = Math.floor(resultSize / 6);
 	const cornerRadius = transparentMargin;
-	const innerSize = resultSize - transparentMargin; // 计算内部图像的大小
+	const innerSize = resultSize - transparentMargin * 2; // 计算内部图像的大小
 	try {
 		const imageBuffer = await fetchImage(url);
 		const mask = await sharp({
