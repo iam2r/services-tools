@@ -41,8 +41,9 @@ web
 	.get('/manifest', zValidator('query', manifestSchema), async (c) => {
 		// 获取当前请求的 URL
 		const url = new URL(c.req.url);
-		console.log(url);
-		const maskableApi = `${url.origin.replace('http', 'https')}/api/sharps/macos-icon`;
+		const isIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(url.origin);
+		const useHttp = isIP || url.origin.includes('http://localhost');
+		const maskableApi = `${useHttp ? url.origin : url.origin.replace('http', 'https')}/api/sharps/macos-icon`;
 		const query = c.req.valid('query');
 		const {
 			name,

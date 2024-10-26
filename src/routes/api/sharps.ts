@@ -24,9 +24,9 @@ sharps.get('/macos-icon', async (c) => {
 						// 返回宽度和高度中较小的值
 						return Math.min(width || 0, height || 0);
 				  })();
-		const transparentMargin = Math.floor(resultSize / 12);
-		const cornerRadius = transparentMargin * 2;
+		const transparentMargin = Math.floor(resultSize * 0.1 * 0.5);
 		const innerSize = resultSize - transparentMargin * 2; // 计算内部图像的大小
+		const cornerRadius = innerSize / 6;
 
 		const mask = await sharp({
 			create: {
