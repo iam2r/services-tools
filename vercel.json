@@ -1,14 +1,14 @@
 {
 	"builds": [
 		{
-			"src": "app.mjs",
+			"src": "src/runtimes/node.ts",
 			"use": "@vercel/node"
 		}
 	],
 	"rewrites": [
 		{
 			"source": "/(.*)",
-			"destination": "/app.mjs"
+			"destination": "/src/runtimes/node.ts"
 		}
 	]
 }
