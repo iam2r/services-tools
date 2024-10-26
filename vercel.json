@@ -2,7 +2,7 @@
 	"rewrites": [
 		{
 			"source": "/(.*)",
-			"destination": "/src/runtime/vercel.ts"
+			"destination": "/src/runtime/vercel"
 		}
 	]
 }
