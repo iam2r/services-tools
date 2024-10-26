@@ -1,3 +1,4 @@
+import 'config.js';
 import { serve } from '@hono/node-server';
 import { scheduleTasks } from '@/utils/schedule-tasks.js';
 import { startLog } from '@/utils/start-log.js';
