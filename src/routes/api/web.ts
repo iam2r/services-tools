@@ -84,7 +84,8 @@ web
 								...(custom_icon_maskable === 'true' && src.startsWith('http')
 									? [
 											{
-												src: `${maskableApi}?url=${encodeURIComponent(src)}`,
+												// src: `${maskableApi}?url=${encodeURIComponent(src)}`,
+												src,
 												sizes: `${size}x${size}`,
 												type: 'image/png',
 												purpose: 'maskable',
