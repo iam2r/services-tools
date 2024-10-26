@@ -5,16 +5,29 @@ import { fetchImage } from '@/utils/fetch-image.ts';
 const sharps = new Hono();
 
 sharps.get('/macos-icon', async (c) => {
-	const { url, size = 512 } = c.req.query();
+	const { url, size } = c.req.query();
 	if (!url) {
 		return c.json({ error: 'No image URL provided' }, 400);
 	}
-	const resultSize = Number(size);
-	const transparentMargin = Math.floor(resultSize / 6);
-	const cornerRadius = transparentMargin;
-	const innerSize = resultSize - transparentMargin * 2; // 计算内部图像的大小
+
 	try {
 		const imageBuffer = await fetchImage(url);
+		const resultSize =
+			typeof size !== 'undefined'
+				? Number(size)
+				: await (async () => {
+						// 使用 sharp.metadata() 获取图像元数据
+						const metadata = await sharp(imageBuffer).metadata();
+						const width = metadata.width;
+						const height = metadata.height;
+
+						// 返回宽度和高度中较小的值
+						return Math.min(width || 0, height || 0);
+				  })();
+		const transparentMargin = Math.floor(resultSize / 12);
+		const cornerRadius = transparentMargin * 2;
+		const innerSize = resultSize - transparentMargin * 2; // 计算内部图像的大小
+
 		const mask = await sharp({
 			create: {
 				width: innerSize,
