@@ -9,7 +9,7 @@ const manifestSchema = z.object({
 	custom_base64_encoded_json: z.string().optional(),
 	custom_icon: z
 		.string()
-		.default('https://placehold.co/{size}/{custom_icon_color}/{custom_icon_text_color}?text={short_name}&font={custom_icon_text_font}'),
+		.default('https://placehold.co/{size}/{custom_icon_color}/{custom_icon_text_color}.png?text={short_name}&font={custom_icon_text_font}'),
 	custom_icon_text_font: z.enum(['oswald']).default('oswald'),
 	custom_icon_color: z
 		.string()
@@ -58,9 +58,8 @@ web
 		Object.assign(validatedData, { short_name, theme_color: `#${theme_color}`, background_color: `#${background_color}` });
 		try {
 			if (custom_icon) {
-				const extensionMatch = custom_icon.match(/\.([a-z]+)\??/i);
+				const extensionMatch = custom_icon.slice(0, custom_icon.indexOf('?')).match(/\.([a-z]+)$/i);
 				const extension = extensionMatch ? extensionMatch[1].toLowerCase() : 'svg';
-
 				const mimeTypes = {
 					svg: 'image/svg+xml',
 					png: 'image/png',
@@ -70,8 +69,6 @@ web
 					avif: 'image/avif',
 				};
 				const mimeType = mimeTypes[extension as keyof typeof mimeTypes] || mimeTypes.svg;
-				console.log(mimeType);
-				const isSVG = mimeType === 'image/svg+xml';
 				Object.assign(validatedData, {
 					icons: [57, 60, 72, 76, 114, 120, 144, 152, 180, 192, 512]
 						.map((size) => {
