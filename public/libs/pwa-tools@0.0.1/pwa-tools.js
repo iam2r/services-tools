@@ -29,9 +29,6 @@
 		if (name) {
 			setupElement('meta', { name: 'apple-mobile-web-app-title' }, { content: name });
 		}
-		icons.forEach((icon) => {
-			setupElement('link', { rel: 'apple-touch-icon', sizes: icon.sizes }, { href: icon.src });
-		});
 	};
 
 	const PwaTools = {
