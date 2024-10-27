@@ -11,7 +11,6 @@ const manifestSchema = z.object({
 		.string()
 		.default('https://placehold.co/{size}/{custom_icon_color}/{custom_icon_text_color}?text={short_name}&font={custom_icon_text_font}'),
 	custom_icon_text_font: z.enum(['oswald']).default('oswald'),
-	custom_icon_maskable: z.enum(['true', 'false']).default('true'),
 	custom_icon_color: z
 		.string()
 		.regex(/^[0-9a-fA-F]{6}$/)
@@ -49,7 +48,6 @@ web
 			custom_base64_encoded_json,
 			theme_color,
 			background_color,
-			custom_icon_maskable,
 		} = query;
 		const short_name = query.short_name || name;
 		const parseParams = manifestSchema.parse(query);
@@ -60,8 +58,22 @@ web
 		Object.assign(validatedData, { short_name, theme_color: `#${theme_color}`, background_color: `#${background_color}` });
 		try {
 			if (custom_icon) {
+				const extensionMatch = custom_icon.match(/\.([a-z]+)\??/i);
+				const extension = extensionMatch ? extensionMatch[1].toLowerCase() : 'svg';
+
+				const mimeTypes = {
+					svg: 'image/svg+xml',
+					png: 'image/png',
+					jpg: 'image/jpeg',
+					jpeg: 'image/jpeg',
+					webp: 'image/webp',
+					avif: 'image/avif',
+				};
+				const mimeType = mimeTypes[extension as keyof typeof mimeTypes] || mimeTypes.svg;
+				console.log(mimeType);
+				const isSVG = mimeType === 'image/svg+xml';
 				Object.assign(validatedData, {
-					icons: [192, 512, 1024]
+					icons: [192, ...(!isSVG ? [512, 1024] : [])]
 						.map((size) => {
 							const src = custom_icon
 								.replace('{size}', String(size))
@@ -73,19 +85,10 @@ web
 							return [
 								{
 									src,
-									sizes: `${size}x${size}`,
-									type: 'image/png',
+									sizes: isSVG ? 'any' : `${size}x${size}`,
+									type: mimeType,
+									purpose: 'maskable',
 								},
-								...(custom_icon_maskable === 'true' && src.startsWith('http')
-									? [
-											{
-												src,
-												sizes: `${size}x${size}`,
-												type: 'image/png',
-												purpose: 'maskable',
-											},
-									  ]
-									: []),
 							];
 						})
 						.flat(),
