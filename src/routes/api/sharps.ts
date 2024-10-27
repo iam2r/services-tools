@@ -1,6 +1,6 @@
+import { fetchImage } from '../../utils/fetch-image.js';
 import { Hono } from 'hono';
 import sharp from 'sharp';
-import { fetchImage } from '../../utils/fetch-image.js';
 
 const sharps = new Hono();
 
@@ -23,7 +23,7 @@ sharps.get('/macos-icon', async (c) => {
 
 						// 返回宽度和高度中较小的值
 						return Math.min(width || 0, height || 0);
-				  })();
+					})();
 		const transparentMargin = 0;
 		const innerSize = resultSize - transparentMargin * 2; // 计算内部图像的大小
 		const cornerRadius = innerSize / 6;

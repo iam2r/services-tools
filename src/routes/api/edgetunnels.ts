@@ -1,7 +1,7 @@
-import { Hono } from 'hono';
-import url from 'url';
-import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
+import { z } from 'zod';
+import url from 'url';
 
 const edgetunnels = new Hono();
 
@@ -14,7 +14,7 @@ edgetunnels.get(
 			type: z.enum(['original', 'custom', 'pure']).default('pure'),
 			security: z.enum(['tls']).optional(),
 			autoQuery: z.enum(['true', 'false']).default('true'),
-		})
+		}),
 	),
 	async (c) => {
 		try {
@@ -42,7 +42,7 @@ edgetunnels.get(
 						name.match(
 							isCustom
 								? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|法国|荷兰|波兰|芬兰|德国|都柏林|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA|HKG|TOKYO|SINGAPORE|TAIPEI|PL|FR)/i
-								: /.*/
+								: /.*/,
 						) || [];
 					const rules = [
 						/**
@@ -83,7 +83,7 @@ edgetunnels.get(
 		} catch (error) {
 			return c.text('Error');
 		}
-	}
+	},
 );
 
 export default edgetunnels;

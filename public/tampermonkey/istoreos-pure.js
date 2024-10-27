@@ -231,12 +231,12 @@
 					selector: '.containers .app-container',
 					filterFun: (element) => {
 						return ['ddnsto', 'ddns.to', i18n.t('linkease')].some((key) =>
-							element.querySelector('.app-name')?.innerText?.toLowerCase()?.includes(key)
+							element.querySelector('.app-name')?.innerText?.toLowerCase()?.includes(key),
 						);
 					},
 				},
 			],
-		]
+		],
 	) {
 		selectors.forEach(
 			({
@@ -251,7 +251,7 @@
 
 					elements.forEach(action);
 				}
-			}
+			},
 		);
 	}
 

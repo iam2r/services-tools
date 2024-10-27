@@ -1,13 +1,13 @@
-import 'config.js';
-import { Hono } from 'hono';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { scheduleTasks } from './utils/schedule-tasks.js';
+import { startLog } from './utils/start-log.js';
+import { prettyJSON } from 'hono/pretty-json';
+import { serve } from '@hono/node-server';
+import router from './routes/index.js';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
-import { prettyJSON } from 'hono/pretty-json';
-import router from './routes/index.js';
-import { serveStatic } from '@hono/node-server/serve-static';
-import { serve } from '@hono/node-server';
-import { startLog } from './utils/start-log.js';
-import { scheduleTasks } from './utils/schedule-tasks.js';
+import { Hono } from 'hono';
+import 'config.js';
 
 export const app = new Hono()
 	.use(logger())

@@ -1,8 +1,8 @@
-import { Hono } from 'hono';
-import { type FC } from 'hono/jsx';
-import { DemoContext } from './context/index.jsx';
 import { AsyncComponent } from './async-fc/index.js';
+import { DemoContext } from './context/index.jsx';
 import { zValidator } from '@hono/zod-validator';
+import { type FC } from 'hono/jsx';
+import { Hono } from 'hono';
 import { z } from 'zod';
 
 const demo = new Hono();
@@ -15,7 +15,7 @@ const Layout: FC = (props) => {
 	);
 };
 
-const Top: FC<{ messages: string[] }> = (props: { messages: string[] }) => {
+const Top: FC = (props: { messages: string[] }) => {
 	return (
 		<Layout>
 			<h1>Hello Hono!</h1>
@@ -35,7 +35,7 @@ demo
 			'param',
 			z.object({
 				name: z.enum(['context', 'async-fc']),
-			})
+			}),
 		),
 		(c) => {
 			const { name } = c.req.valid('param');
@@ -47,7 +47,7 @@ demo
 				default:
 					return c.html(<Top messages={['Demo']} />);
 			}
-		}
+		},
 	)
 	.get('/*', (c) => {
 		const messages = ['Good Morning', 'Good Evening', 'Good Night'];

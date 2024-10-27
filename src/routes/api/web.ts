@@ -1,7 +1,7 @@
-import { Hono } from 'hono';
-import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { omit } from 'lodash-es';
+import { Hono } from 'hono';
+import { z } from 'zod';
 
 const web = new Hono();
 
@@ -53,7 +53,7 @@ web
 		const parseParams = manifestSchema.parse(query);
 		const validatedData = omit(
 			parseParams,
-			Object.keys(parseParams).filter((key) => /^custom_/.test(key))
+			Object.keys(parseParams).filter((key) => /^custom_/.test(key)),
 		);
 		Object.assign(validatedData, { short_name, theme_color: `#${theme_color}`, background_color: `#${background_color}` });
 		try {

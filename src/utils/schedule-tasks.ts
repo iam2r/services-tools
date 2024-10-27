@@ -26,8 +26,8 @@ export const scheduleTasks = () => {
 					urls.map((url) =>
 						fetch(url).catch(() => {
 							console.error(`Error sending keep-alive request for ${url}!`);
-						})
-					)
+						}),
+					),
 				).then(() => console.log('Keep-alive requests sent successfully'));
 			});
 
