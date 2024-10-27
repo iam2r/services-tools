@@ -73,7 +73,7 @@ web
 				console.log(mimeType);
 				const isSVG = mimeType === 'image/svg+xml';
 				Object.assign(validatedData, {
-					icons: [192, ...(!isSVG ? [512, 1024] : [])]
+					icons: [57, 60, 72, 76, 114, 120, 144, 152, 180, 192, 512]
 						.map((size) => {
 							const src = custom_icon
 								.replace('{size}', String(size))
@@ -85,7 +85,12 @@ web
 							return [
 								{
 									src,
-									sizes: isSVG ? 'any' : `${size}x${size}`,
+									sizes: `${size}x${size}`,
+									type: mimeType,
+								},
+								{
+									src,
+									sizes: `${size}x${size}`,
 									type: mimeType,
 									purpose: 'maskable any',
 								},
