@@ -87,7 +87,7 @@ web
 									src,
 									sizes: isSVG ? 'any' : `${size}x${size}`,
 									type: mimeType,
-									purpose: 'maskable',
+									purpose: 'maskable any',
 								},
 							];
 						})
