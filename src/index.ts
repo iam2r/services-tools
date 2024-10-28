@@ -1,3 +1,6 @@
+//first line setup env
+import 'config.js';
+
 import { serveStatic } from '@hono/node-server/serve-static';
 import { scheduleTasks } from './utils/schedule-tasks.js';
 import { startLog } from './utils/start-log.js';
@@ -7,7 +10,6 @@ import router from './routes/index.js';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
 import { Hono } from 'hono';
-import 'config.js';
 
 export const app = new Hono()
 	.use(logger())
