@@ -2,7 +2,6 @@ FROM node:18
 ENV APP_HOME /node/app
 WORKDIR $APP_HOME
 RUN yarn global add pm2 pnpm
-RUN mkdir -p ./logs
 COPY package*.json yarn*.lock pnpm-lock.yaml $APP_HOME/
 RUN pnpm install
 COPY . $APP_HOME/
