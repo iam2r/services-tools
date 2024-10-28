@@ -10,7 +10,9 @@ const manifestSchema = z.object({
 	custom_icon: z
 		.string()
 		.default('https://placehold.co/{size}/{custom_icon_color}/{custom_icon_text_color}.png?text={short_name}&font={custom_icon_text_font}'),
-	custom_icon_text_font: z.enum(['oswald']).default('oswald'),
+	custom_icon_text_font: z
+		.enum(['oswald', 'lato', 'lora', 'montserrat', 'open-sans', 'playfair-display', 'pt-sans', 'raleway', 'roboto', 'source-sans-pro'])
+		.default('oswald'),
 	custom_icon_color: z
 		.string()
 		.regex(/^[0-9a-fA-F]{6}$/)
