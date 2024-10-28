@@ -15,7 +15,9 @@ const Layout: FC = (props) => {
 	);
 };
 
-const Top: FC = (props: { messages: string[] }) => {
+type TopProps = { messages: string[] };
+
+const Top: FC<TopProps> = (props: TopProps) => {
 	return (
 		<Layout>
 			<h1>Hello Hono!</h1>
