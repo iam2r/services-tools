@@ -21,14 +21,14 @@ edgetunnels.get(
 			const { path = 'sub.xf.free.hr/sub', type = 'pure', security = '', autoQuery = 'true' } = c.req.valid('query');
 			const _url = /^http(s?):\/\//.test(path) ? path : `https://${path}`;
 			const params = autoQuery === 'true' ? new URLSearchParams({ host: 'my.host', uuid: '56ddc8b9-5343-41e7-8500-4ff79f5deb92' }) : '';
+			const isPureMode = type === 'pure';
+			const isCustom = type === 'custom';
+			const isOriginal = type === 'original';
 			const response = await fetch(`${_url}${params ? `?${params}` : ''}`);
 			if (!response.ok) {
 				throw new Error('Network response was not ok');
 			}
-
 			const data = await response.text();
-			const isPureMode = type === 'pure';
-			const isCustom = type === 'custom';
 			const getHost = ({ formattedString, port }: { formattedString: string; port: string | number | null }) =>
 				`${formattedString.split('#')?.[0]}:${port}`;
 			const result = Buffer.from(data, 'base64')
@@ -38,12 +38,14 @@ edgetunnels.get(
 				.map((vlessUrl) => {
 					const { host, hash, query, hostname, port = 443 } = url.parse(vlessUrl, true);
 					const name = decodeURI((hash || '').replace(/^\#/, ''));
+
 					const [, area] =
 						name.match(
 							isCustom
 								? /(移动|联通|电信|狮城|新加坡|香港|台湾|日本|韩国|美国|英国|法国|荷兰|波兰|芬兰|德国|都柏林|瑞典|西班牙|加拿大|澳洲|US|DE|NL|KR|SG|AU|HK|JP|TW|DE|GB|SE|ES|CA|HKG|TOKYO|SINGAPORE|TAIPEI|PL|FR)/i
 								: /.*/,
 						) || [];
+
 					const rules = [
 						/**
 						 * 存在 host 和 name
@@ -56,16 +58,18 @@ edgetunnels.get(
 						/**
 						 * 纯净模式时不可以包含一些推广关键字
 						 */
-						...(isPureMode || (isCustom && !area) ? [!/(tg|更新|教程|channel|频道|收费|群组|被骗｜维护｜Author)/i.test(name)] : []),
+						...(isPureMode || (isCustom && !area)
+							? [!/(tg|更新|教程|channel|频道|收费|群组|被骗|维护|Author|127\.0\.0\.1)/i.test(name)]
+							: []),
 
 						/**
-						 * 开启 https 筛选时必须开启tlsß
+						 * 开启 https 筛选时必须开启tls
 						 */
 						...(security === 'tls' ? [query.security === 'tls'] : []),
 					];
 
 					const formattedString = rules.every(Boolean)
-						? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : name}`
+						? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : isOriginal ? name : name.replace(/【?请勿测速】?/, '')}`
 						: '';
 
 					return {
