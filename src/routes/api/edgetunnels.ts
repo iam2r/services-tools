@@ -69,7 +69,7 @@ edgetunnels.get(
 					];
 
 					const formattedString = rules.every(Boolean)
-						? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : isOriginal ? name : name.replace(/【?请勿测速】?/, '')}`
+						? `${host}#${area ? `${hostname}:${port} - ${area.toLocaleUpperCase()}` : isOriginal ? name : name.replace(/【?请勿测速】?/, '🤫')}`
 						: '';
 
 					return {
