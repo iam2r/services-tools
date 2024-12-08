@@ -58,7 +58,7 @@ edgetunnels.get(
 						/**
 						 * 纯净模式时不可以包含一些推广关键字
 						 */
-						...(needMatchArea && !area ? [!/(tg|更新|教程|channel|频道|收费|收费|群组|被骗|维护|Author|127\.0\.0\.1)/i.test(name)] : []),
+						...(needMatchArea && !area ? [!/(tg|更新|教程|channel|频道|收费|免费|群组|被骗|维护|Author|127\.0\.0\.1)/i.test(name)] : []),
 
 						/**
 						 * 开启 https 筛选时必须开启tls
