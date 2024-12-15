@@ -1,7 +1,11 @@
-FROM node:18
+FROM node:20-slim
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
 ENV APP_HOME /node/app
 WORKDIR $APP_HOME
-RUN yarn global add pm2 pnpm
+RUN pnpm add -global pm2
 COPY package*.json yarn*.lock pnpm-lock.yaml $APP_HOME/
 RUN pnpm install
 COPY . $APP_HOME/
