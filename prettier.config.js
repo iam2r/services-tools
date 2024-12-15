@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	printWidth: 140,
 	singleQuote: true,
 	semi: true,
