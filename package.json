@@ -4,10 +4,15 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
+		"preinstall": "npx only-allow pnpm",
 		"prepare": "husky install",
 		"prettier": "prettier --ignore-unknown --write *",
 		"start": "tsx watch src/index.ts"
 	},
+	"engines": {
+		"pnpm": ">=9"
+	},
+	"engineStrict": true,
 	"lint-staged": {
 		"*": "pnpm prettier"
 	},
