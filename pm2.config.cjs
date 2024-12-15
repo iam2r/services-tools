@@ -12,7 +12,8 @@ const config = {
 	max_size: '10M', // 设置每个日志文件的最大大小
 	retain: 10, // 保留最近的10个日志文件
 };
-export default {
+
+module.exports = {
 	apps: [
 		{
 			...config,

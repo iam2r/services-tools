@@ -1,5 +1,5 @@
 //first line setup env
-import 'config.js';
+import 'config';
 
 import { serveStatic } from '@hono/node-server/serve-static';
 import { scheduleTasks } from './utils/schedule-tasks.js';
