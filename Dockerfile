@@ -12,7 +12,7 @@ COPY . $APP_HOME/
 
 EXPOSE 3000
 
-CMD ["sh","-c", "pm2-docker start pm2.config.mjs"]
+CMD ["sh","-c", "pm2-docker start pm2.config.cjs"]
 
 #docker run --rm -e HTTP_PROXY=http://localhost:7890 -it -p 3000:3000/tcp openai-tools:latest
 
