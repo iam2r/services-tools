@@ -482,7 +482,7 @@
 		<script src="/static/libs/pwa-tools@0.0.1/pwa-tools.js"></script>
 		<script>
 			window.PwaTools.initManifest(
-				'/api/web/pwa/manifest?name=EPUB%20FIX&custom_icon_text_color=ffffff&custom_icon_color=3563f4&start_url=/static/kindle-epub-fix',
+				`/api/web/pwa/manifest?name=EPUB%20FIX&custom_icon_text_color=ffffff&custom_icon_color=3563f4&start_url=${window.location.pathname}`,
 			);
 			window.PwaTools.registerThemeColor('#f5f5f5', '#f5f5f5');
 		</script>
